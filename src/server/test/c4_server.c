@@ -64,10 +64,15 @@ c4GamePlayerHasWon(C4GameState* self, pxiword x, pxiword y, pxiword length)
     pxuword value = 0;
 
     for (pxiword i = 0; i < DIRS; i += 1) {
-        pxiword line = c4GameBoardContainsLine(
+        pxiword j = (i + 4) % DIRS;
+
+        pxiword forw = c4GameBoardContainsLine(
             &self->board, x, y, xs[i], ys[i], &value);
 
-        if (line >= length) return value;
+        pxiword back = c4GameBoardContainsLine(
+            &self->board, x, y, xs[j], ys[j], &value);
+
+        if (forw + back > length) return value;
     }
 
     return 0;
