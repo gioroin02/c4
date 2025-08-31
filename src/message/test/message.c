@@ -21,7 +21,7 @@ main(int argc, char** argv)
     PxBuffer8 target = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
     PxBuffer8 buffer = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
 
-    pxBuffer8WriteStringTail(&source, MESSAGE);
+    pxBuffer8WriteString8Tail(&source, MESSAGE);
 
     PxJsonReader reader = pxJsonReaderMake(&arena, 8,
         pxBufferReader(&source, &buffer));

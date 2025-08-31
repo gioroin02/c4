@@ -87,7 +87,7 @@ fileReader(void* self, PxBuffer8* buffer)
 }
 
 pxiword
-fileReadIWord(PxString8 string, PxReader* reader, PxArena* arena, PxFormatOptions options)
+fileReadIWord(PxString8 string, PxReader* reader, PxArena* arena, pxuword radix, PxFormatOption options)
 {
     pxiword result = 0;
     pxiword offset = pxArenaOffset(arena);
@@ -101,7 +101,8 @@ fileReadIWord(PxString8 string, PxReader* reader, PxArena* arena, PxFormatOption
         PxString8 line =
             pxReaderLine(reader, arena, length);
 
-        state = pxIWordFromString8(&result, options, line);
+        state = pxIWordFromString8(&result,
+            radix, options, line);
 
         pxArenaOffset(arena);
     }
@@ -238,15 +239,16 @@ c4GameLoop(PxArena* arena, C4Client* client, C4GameState* game)
                         default: active = 0; break;
                     }
                 } else {
-                    PxFormatOptions options = pxFormatOptions(10,
-                        PX_FORMAT_FLAG_LEADING_PLUS | PX_FORMAT_FLAG_LEADING_ZERO);
+                    PxFormatOption options =
+                        PX_FORMAT_OPTION_LEADING_PLUS |
+                        PX_FORMAT_OPTION_LEADING_ZERO;
 
                     pxiword column = 0;
                     pxb8    state  = 0;
 
                     while (state == 0) {
                         column = fileReadIWord(pxs8("->"),
-                            &reader, arena, options) - 1;
+                            &reader, arena, 10, options) - 1;
 
                         state = c4GameBoardInsert(&game->board, column,
                             player.code);
@@ -293,13 +295,13 @@ main(int argc, char** argv)
     if (pxNetworkStart() == 0) return 1;
 
     C4ClientConfig config = {
-        .server_addr = pxAddressLocalHost(PX_ADDRESS_TYPE_IP4),
+        .server_addr = pxAddressLocalhost(PX_ADDRESS_TYPE_IP4),
         .server_port = 50000,
         .automatic   = 0,
     };
 
     if (argc > 1) {
-        PxFormatOptions options = pxFormatOptionsRadix(10);
+        PxFormatOption options = PX_FORMAT_OPTION_NONE;
 
         for (pxiword i = 1; i < argc; i += 1) {
             PxString8 arg = pxString8FromMemory(argv[i], 32);
@@ -308,7 +310,7 @@ main(int argc, char** argv)
                 arg = pxString8TrimPrefix(arg, pxs8("--server-addr="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxAddressFromString(&config.server_addr,
+                pxAddressFromString8(&config.server_addr,
                     PX_ADDRESS_TYPE_IP4, arg);
             }
 
@@ -316,7 +318,7 @@ main(int argc, char** argv)
                 arg = pxString8TrimPrefix(arg, pxs8("--server-port="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxU16FromString8(&config.server_port, options, arg);
+                pxU16FromString8(&config.server_port, 10, options, arg);
             }
 
             if (pxString8IsEqual(arg, pxs8("--automatic")) != 0)

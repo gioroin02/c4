@@ -37,11 +37,11 @@ static const char* const FRONTS[] = {
 
 typedef struct C4ServerConfig
 {
-    PxAddress server_addr;
-    pxu16     server_port;
-    pxuword   board_width;
-    pxuword   board_height;
-    pxuword   players;
+    PxAddressType type;
+    pxu16         port;
+    pxuword       board_width;
+    pxuword       board_height;
+    pxuword       players;
 }
 C4ServerConfig;
 
@@ -275,62 +275,62 @@ main(int argc, char** argv)
     if (pxNetworkStart() == 0) return 1;
 
     C4ServerConfig config = {
-        .server_addr  = pxAddressLocalHost(PX_ADDRESS_TYPE_IP4),
-        .server_port  = 50000,
-        .board_width = 5,
+        .type         = PX_ADDRESS_TYPE_IP4,
+        .port         = 50000,
+        .board_width  = 5,
         .board_height = 5,
         .players      = 2,
     };
 
     if (argc > 1) {
-        PxFormatOptions options = pxFormatOptionsRadix(10);
+        PxFormatOption options = PX_FORMAT_OPTION_NONE;
 
         for (pxiword i = 1; i < argc; i += 1) {
             PxString8 arg = pxString8FromMemory(argv[i], 32);
 
-            if (pxString8BeginsWith(arg, pxs8("--server-addr=")) != 0) {
-                arg = pxString8TrimPrefix(arg, pxs8("--server-addr="));
+            if (pxString8BeginsWith(arg, pxs8("--server-ip-version=")) != 0) {
+                arg = pxString8TrimPrefix(arg, pxs8("--server-ip-version="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxAddressFromString(&config.server_addr,
-                    PX_ADDRESS_TYPE_IP4, arg);
+                if (pxString8IsEqual(arg, pxs8("ipv6")) != 0)
+                    config.type = PX_ADDRESS_TYPE_IP6;
             }
 
-            if (pxString8BeginsWith(arg, pxs8("--server-port=")) != 0) {
-                arg = pxString8TrimPrefix(arg, pxs8("--server-port="));
+            if (pxString8BeginsWith(arg, pxs8("--port=")) != 0) {
+                arg = pxString8TrimPrefix(arg, pxs8("--port="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxU16FromString8(&config.server_port, options, arg);
+                pxU16FromString8(&config.port, 10, options, arg);
             }
 
             if (pxString8BeginsWith(arg, pxs8("--board-width=")) != 0) {
                 arg = pxString8TrimPrefix(arg, pxs8("--board-width="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxUWordFromString8(&config.board_width, options, arg);
+                pxUWordFromString8(&config.board_width, 10, options, arg);
             }
 
             if (pxString8BeginsWith(arg, pxs8("--board-height=")) != 0) {
                 arg = pxString8TrimPrefix(arg, pxs8("--board-height="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxUWordFromString8(&config.board_height, options, arg);
+                pxUWordFromString8(&config.board_height, 10, options, arg);
             }
 
             if (pxString8BeginsWith(arg, pxs8("--players=")) != 0) {
                 arg = pxString8TrimPrefix(arg, pxs8("--players="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxUWordFromString8(&config.players, options, arg);
+                pxUWordFromString8(&config.players, 10, options, arg);
             }
         }
     }
 
     C4Server server = c4ServerMake(&arena, config.players,
-        PX_ADDRESS_TYPE_IP4);
+        config.type);
 
-    pxb8 state = c4ServerStart(&server, config.server_addr,
-        config.server_port);
+    pxb8 state = c4ServerStart(&server,
+        pxAddressAny(config.type), config.port);
 
     if (state == 0) return 1;
 
@@ -338,8 +338,6 @@ main(int argc, char** argv)
 
     if (c4GameStart(&arena, &server, &game, config) == 0)
         return 1;
-
-    // return 0;
 
     c4GameLoop(&arena, &server, &game);
     c4GameStop(&arena, &server, &game);

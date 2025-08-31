@@ -73,7 +73,7 @@ showGameBoard(C4GameBoard* self)
 }
 
 pxiword
-consoleReadIWord(PxString8 string, PxReader* reader, PxArena* arena, PxFormatOptions options)
+consoleReadIWord(PxString8 string, PxReader* reader, PxArena* arena, pxuword radix, PxFormatOption options)
 {
     pxb8    state  = 0;
     pxiword result = 0;
@@ -85,7 +85,7 @@ consoleReadIWord(PxString8 string, PxReader* reader, PxArena* arena, PxFormatOpt
         PxString8 line =
             pxReaderLine(reader, arena, reader->buffer->length);
 
-        state = pxIWordFromString8(&result, options, line);
+        state = pxIWordFromString8(&result, radix, options, line);
 
         pxArenaRewind(arena, offset);
     } while (state == 0);
@@ -126,8 +126,9 @@ main(int argc, char** argv)
     PxBuffer8 buffer = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
     PxReader  reader = fileReader(stdin, &buffer);
 
-    PxFormatOptions options = pxFormatOptions(10,
-        PX_FORMAT_FLAG_LEADING_ZERO | PX_FORMAT_FLAG_LEADING_PLUS);
+    PxFormatOption options =
+        PX_FORMAT_OPTION_LEADING_ZERO |
+        PX_FORMAT_OPTION_LEADING_PLUS;
 
     pxuword value = 0;
 
@@ -141,7 +142,7 @@ main(int argc, char** argv)
         printf("\n");
 
         column = consoleReadIWord(pxs8("-> "),
-            &reader, &arena, options) - 1;
+            &reader, &arena, 10, options) - 1;
 
         if (column < 0 || column >= board.width)
             break;
@@ -152,7 +153,7 @@ main(int argc, char** argv)
 
         c4GameBoardInsert(&board, column, 1);
 
-        value  = playerHasWon(&board, column, height, 4);
+        value = playerHasWon(&board, column, height, 4);
     }
 
     showGameBoard(&board);
