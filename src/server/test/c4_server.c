@@ -79,7 +79,7 @@ c4GamePlayerHasWon(C4GameState* self, pxiword x, pxiword y, pxiword length)
 }
 
 void
-c4GameBoardShow(C4GameState* game)
+c4GameBoardLog(C4GameState* game)
 {
     printf("#");
 
@@ -120,18 +120,18 @@ c4GameBoardShow(C4GameState* game)
     printf("\n");
 }
 
-C4Message
+C4Msg
 c4GameAccept(PxArena* arena, C4Server* server, C4GameState* game, C4ServerConfig config)
 {
     pxiword    offset  = pxArenaOffset(arena);
     C4Session* session = c4SessionOpen(server, arena);
 
-    if (session == 0) return (C4Message) {0};
+    if (session == 0) return (C4Msg) {0};
 
     session->request  = pxBuffer8Reserve(arena, PX_MEMORY_KIB);
     session->response = pxBuffer8Reserve(arena, PX_MEMORY_KIB);
 
-    C4Message message = c4SessionRead(session, arena);
+    C4Msg message = c4SessionRead(session, arena);
 
     if (message.type == C4_MESSAGE_PLAYER_JOIN)
         return message;
@@ -140,7 +140,7 @@ c4GameAccept(PxArena* arena, C4Server* server, C4GameState* game, C4ServerConfig
 
     pxArenaRewind(arena, offset);
 
-    return (C4Message) {0};
+    return (C4Msg) {0};
 }
 
 pxb8
@@ -158,7 +158,7 @@ c4GameStart(PxArena* arena, C4Server* server, C4GameState *game, C4ServerConfig 
     while (c4GamePlayerListIsFull(&game->players) == 0) {
         pxiword size = c4GamePlayerListSize(&game->players);
 
-        C4Message  message = c4GameAccept(arena, server, game, config);
+        C4Msg  message = c4GameAccept(arena, server, game, config);
         C4Session* session = c4ServerGetOr(server, size, 0);
 
         if (message.type == C4_MESSAGE_NONE || session == 0)
@@ -201,7 +201,7 @@ c4GameLoop(PxArena* arena, C4Server* server, C4GameState* game)
     pxiword size   = c4GamePlayerListSize(&game->players);
     pxb8    active = 1;
 
-    c4GameBoardShow(game);
+    c4GameBoardLog(game);
 
     c4ServerBroadcast(server, arena, 0, c4MsgGameStart());
 
@@ -213,7 +213,7 @@ c4GameLoop(PxArena* arena, C4Server* server, C4GameState* game)
         c4ServerBroadcast(server, arena, 0,
             c4MsgPlayerTurn(game->turn + 1));
 
-        C4Message message = c4SessionRead(session, arena);
+        C4Msg message = c4SessionRead(session, arena);
 
         switch (message.type) {
             case C4_MESSAGE_PLAYER_CHOICE: {
@@ -251,7 +251,7 @@ c4GameLoop(PxArena* arena, C4Server* server, C4GameState* game)
 
         game->turn = (game->turn + 1) % size;
 
-        c4GameBoardShow(game);
+        c4GameBoardLog(game);
 
         pxArenaRewind(arena, offset);
     }

@@ -28,7 +28,7 @@ void
 c4ServerStop(C4Server* self);
 
 void
-c4ServerBroadcast(C4Server* self, PxArena* arena, C4Session* from, C4Message value);
+c4ServerBroadcast(C4Server* self, PxArena* arena, C4Session* from, C4Msg value);
 
 pxiword
 c4ServerFind(C4Server* self, C4Session* value);
@@ -46,9 +46,9 @@ pxb8
 c4SessionClose(C4Server* self, C4Session* session);
 
 pxb8
-c4SessionWrite(C4Session* self, PxArena* arena, C4Message value);
+c4SessionWrite(C4Session* self, PxArena* arena, C4Msg value);
 
-C4Message
+C4Msg
 c4SessionRead(C4Session* self, PxArena* arena);
 
 #endif // C4_SERVER_H

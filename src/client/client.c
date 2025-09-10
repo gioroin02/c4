@@ -84,18 +84,18 @@ c4ClientStop(C4Client* self)
 }
 
 pxb8
-c4ClientWrite(C4Client* self, PxArena* arena, C4Message value)
+c4ClientWrite(C4Client* self, PxArena* arena, C4Msg value)
 {
     printf(TRACE " Scrittura di ");
 
     pxiword offset = pxArenaOffset(arena);
 
-    c4ShowMessage(&value);
+    c4LogMsg(&value);
 
     PxJsonWriter writer = pxJsonWriterMake(arena, 4,
         pxSocketTcpWriter(self->socket, &self->response));
 
-    pxb8 state = c4JsonWriteMessage(&value, &writer, arena);
+    pxb8 state = c4JsonWriteMsg(&value, &writer, arena);
 
     pxArenaRewind(arena, offset);
 
@@ -105,20 +105,20 @@ c4ClientWrite(C4Client* self, PxArena* arena, C4Message value)
     return state;
 }
 
-C4Message
+C4Msg
 c4ClientRead(C4Client* self, PxArena* arena)
 {
     printf(TRACE " Lettura di... ");
 
-    C4Message result = {0};
+    C4Msg result = {0};
     pxiword   offset = pxArenaOffset(arena);
 
     PxJsonReader reader = pxJsonReaderMake(arena, 4,
         pxSocketTcpReader(self->socket, &self->request));
 
-    pxb8 state = c4JsonReadMessage(&result, &reader, arena);
+    pxb8 state = c4JsonReadMsg(&result, &reader, arena);
 
-    c4ShowMessage(&result);
+    c4LogMsg(&result);
 
     pxArenaRewind(arena, offset);
 

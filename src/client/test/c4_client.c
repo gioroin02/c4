@@ -111,7 +111,7 @@ fileReadIWord(PxString8 string, PxReader* reader, PxArena* arena, pxuword radix,
 }
 
 void
-c4GameBoardShow(C4GameState* game)
+c4GameBoardLog(C4GameState* game)
 {
     printf("#");
 
@@ -155,7 +155,7 @@ c4GameBoardShow(C4GameState* game)
 pxb8
 c4GameStart(PxArena* arena, C4Client* client, C4GameState* game, C4ClientConfig config)
 {
-    C4Message message = {0};
+    C4Msg message = {0};
 
     c4ClientWrite(client, arena, c4MsgPlayerJoin(config.automatic));
 
@@ -216,10 +216,10 @@ c4GameLoop(PxArena* arena, C4Client* client, C4GameState* game)
 
     c4GamePlayerListRead(&game->players, 0, &player);
 
-    c4GameBoardShow(game);
+    c4GameBoardLog(game);
 
     while (active != 0) {
-        C4Message message = c4ClientRead(client, arena);
+        C4Msg message = c4ClientRead(client, arena);
 
         switch (message.type) {
             case C4_MESSAGE_PLAYER_TURN: {
@@ -271,7 +271,7 @@ c4GameLoop(PxArena* arena, C4Client* client, C4GameState* game)
             default: active = 0; break;
         }
 
-        c4GameBoardShow(game);
+        c4GameBoardLog(game);
 
         pxArenaRewind(arena, offset);
     }

@@ -1,96 +1,26 @@
 #include "../export.h"
-#include "../../cpax/pax/stream/export.h"
 
-#include <stdio.h>
+#define FGROUND ((C4Color) \
+    {.type = PX_CONSOLE_COLOR_RGBA, .color_rgba = {255, 255, 255, 0}})
 
-pxiword
-fileRead(void* self, PxBuffer8* buffer)
-{
-    pxBuffer8Normalize(buffer);
-
-    pxu8*   memory = buffer->memory + buffer->size;
-    pxiword size   = buffer->length - buffer->size;
-
-    if (size <= 0) return 0;
-
-    pxiword amount = 0;
-
-    fgets(pxCast(char*, memory), size, self);
-
-    while (memory[amount] != 0)
-        amount += 1;
-
-    buffer->size += amount;
-    buffer->tail  = (buffer->tail + amount) % buffer->length;
-
-    return amount;
-}
-
-PxReader
-fileReader(void* self, PxBuffer8* buffer)
-{
-    if (self == 0 || buffer == 0)
-        return (PxReader) {0};
-
-    return (PxReader) {
-        .buffer = buffer,
-        .ctxt   = self,
-        .proc   = &fileRead,
-    };
-}
+#define BGROUND ((C4Color) \
+    {.type = PX_CONSOLE_COLOR_RGBA, .color_rgba = { 50,  50,  50, 0}})
 
 void
-showGameBoard(C4GameBoard* self)
+c4PaintBoard(C4FrameBuffer* buffer, C4GameBoard* self)
 {
-    printf("#");
+    for (pxiword j = 0; j < self->height; j += 1) {
+        for (pxiword i = 0; i < self->width; i += 1) {
+            pxuword item = c4GameBoardReadOr(self, i, j, 0);
 
-    for (pxiword i = 0; i < self->width; i += 1)
-        printf("-------#");
+            if (item != 0) {
+                pxi32 unicode = PX_ASCII_UPPER_A + item + 1;
 
-    printf("\n");
-
-    for (pxiword r = self->height; r > 0; r -= 1) {
-        printf("| ");
-
-        for (pxiword c = 0; c < self->width; c += 1) {
-            pxuword item = c4GameBoardReadOr(self, c, r - 1, 0);
-
-            if (item != 0)
-                printf(" %4llu | ", item);
-            else
-                printf("      | ");
+                c4FrameBufferPaint(buffer, i, j,
+                    unicode, FGROUND, BGROUND);
+            }
         }
-
-        printf("\n");
     }
-
-    printf("#");
-
-    for (pxiword i = 0; i < self->width; i += 1)
-        printf("-------#");
-
-    printf("\n");
-}
-
-pxiword
-consoleReadIWord(PxString8 string, PxReader* reader, PxArena* arena, pxuword radix, PxFormatOption options)
-{
-    pxb8    state  = 0;
-    pxiword result = 0;
-    pxiword offset = pxArenaOffset(arena);
-
-    do {
-        printf("%.*s", pxCast(int, string.length), string.memory);
-
-        PxString8 line =
-            pxReaderLine(reader, arena, reader->buffer->length);
-
-        state = pxIWordFromString8(&result, radix, options, line);
-
-        pxArenaRewind(arena, offset);
-    } while (state == 0);
-
-    return result;
 }
 
 pxuword
@@ -104,15 +34,11 @@ playerHasWon(C4GameBoard* self, pxiword x, pxiword y, pxiword length)
     pxuword value = 0;
 
     for (pxiword i = 0; i < DIRS; i += 1) {
-        pxiword line =
-            c4GameBoardContainsLine(self, x, y, xs[i], ys[i], &value);
-
-        printf("");
+        pxiword line = c4GameBoardContainsLine(self,
+            x, y, xs[i], ys[i], &value);
 
         if (line >= length) return value;
     }
-
-    printf("\n");
 
     return 0;
 }
@@ -120,41 +46,66 @@ playerHasWon(C4GameBoard* self, pxiword x, pxiword y, pxiword length)
 int
 main(int argc, char** argv)
 {
-    PxArena     arena = pxMemoryReserve(16);
+    PxArena     arena = pxMemoryReserve(32);
     C4GameBoard board = c4GameBoardReserve(&arena, 7, 5);
 
-    PxBuffer8 buffer = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
-    PxReader  reader = fileReader(stdin, &buffer);
+    PxConsole  console  = pxConsoleCreate(&arena, 0);
+    C4Renderer renderer = c4RendererMake(console, &arena, 4 * PX_MEMORY_KIB);
 
-    PxFormatOption options =
-        PX_FORMAT_OPTION_LEADING_ZERO |
-        PX_FORMAT_OPTION_LEADING_PLUS;
+    pxb8    active = 1;
+    pxiword column = 0;
 
-    pxuword value = 0;
+    C4FrameBuffer frame = c4FrameBufferMake(&arena, 100, 30);
 
-    while (value == 0) {
-        pxiword column = board.width;
-        pxiword height = board.height;
-        pxb8    state  = 0;
+    if (pxConsoleSetMode(console, PX_CONSOLE_MODE_EVENT) == 0)
+        return 1;
 
-        showGameBoard(&board);
+    c4RendererReset(&renderer, 0);
+    c4RendererShowCursor(&renderer, 0);
 
-        printf("\n");
+    c4RendererFlush(&renderer);
 
-        column = consoleReadIWord(pxs8("-> "),
-            &reader, &arena, 10, options) - 1;
+    for (pxiword i = 0; active != 0; i += 1) {
+        PxConsoleEvent event = pxConsolePollEvent(console);
 
-        if (column < 0 || column >= board.width)
-            break;
+        pxb8 move_left  = 0;
+        pxb8 move_right = 0;
 
-        height = c4GameBoardHeight(&board, column);
+        switch (event.type) {
+            case PX_CONSOLE_EVENT_KEYBD_PRESS: {
+                switch (event.keybd_press.button) {
+                    case PX_CONSOLE_KEYBD_A:
+                    case PX_CONSOLE_KEYBD_ARROW_LEFT:
+                        move_left = 1;
+                    break;
 
-        printf("\n");
+                    case PX_CONSOLE_KEYBD_D:
+                    case PX_CONSOLE_KEYBD_ARROW_RIGHT:
+                        move_right = 1;
+                    break;
 
-        c4GameBoardInsert(&board, column, 1);
+                    case PX_CONSOLE_KEYBD_ESCAPE:
+                        active = 0;
+                    break;
 
-        value = playerHasWon(&board, column, height, 4);
+                    default: break;
+                }
+            }
+
+            default: break;
+        }
+
+        c4FrameBufferReset(&frame,
+            PX_ASCII_COMMERCIAL, FGROUND, BGROUND);
+
+        c4PaintBoard(&frame, &board);
+
+        c4RendererFrame(&renderer, &arena, &frame);
+        c4RendererFlush(&renderer);
     }
 
-    showGameBoard(&board);
+    c4RendererReset(&renderer, 0);
+    c4RendererFlush(&renderer);
+
+    pxConsoleSetMode(console, PX_CONSOLE_MODE_DEFAULT);
 }

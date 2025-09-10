@@ -21,9 +21,9 @@ void
 c4ClientStop(C4Client* self);
 
 pxb8
-c4ClientWrite(C4Client* self, PxArena* arena, C4Message value);
+c4ClientWrite(C4Client* self, PxArena* arena, C4Msg value);
 
-C4Message
+C4Msg
 c4ClientRead(C4Client* self, PxArena* arena);
 
 #endif // C4_CLIENT_H

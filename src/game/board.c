@@ -145,16 +145,16 @@ c4GameBoardContainsLine(C4GameBoard* self, pxiword x, pxiword y, pxiword dx, pxi
 
     if (dx == 0 && dy == 0) return result;
 
-    x += pxDirectionIWord(dx);
-    y += pxDirectionIWord(dy);
+    x += pxDirectionInteger(dx);
+    y += pxDirectionInteger(dy);
 
     while (c4GameBoardContainsPoint(self, x, y, &temp) != 0) {
         if (temp != other) break;
 
         result += 1;
 
-        x += pxDirectionIWord(dx);
-        y += pxDirectionIWord(dy);
+        x += pxDirectionInteger(dx);
+        y += pxDirectionInteger(dy);
     }
 
     if (value != 0) *value = other;

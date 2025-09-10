@@ -4,4 +4,8 @@
 #include "board.h"
 #include "player.h"
 
+#include "message.h"
+
+#include "renderer.h"
+
 #endif // C4_GAME_EXPORT_H
