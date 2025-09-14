@@ -17,7 +17,7 @@ struct PxLinuxConsole
 };
 
 PxLinuxConsole*
-pxLinuxConsoleCreate(PxArena* arena, pxiword length)
+pxLinuxConsoleCreate(PxArena* arena)
 {
     pxiword offset = pxArenaOffset(arena);
 
@@ -114,18 +114,6 @@ pxLinuxConsoleReadMemory(PxLinuxConsole* self, void* memory, pxiword amount, pxi
         return temp;
 
     return 0;
-}
-
-PxConsoleEvent
-pxLinuxConsoleReadEvent(PxLinuxConsole* self)
-{
-    return (PxConsoleEvent) {.type = PX_CONSOLE_EVENT_NONE};
-}
-
-PxConsoleEvent
-pxLinuxConsolePollEvent(PxLinuxConsole* self)
-{
-    return (PxConsoleEvent) {.type = PX_CONSOLE_EVENT_NONE};
 }
 
 #endif // PX_LINUX_CONSOLE_CONSOLE_C

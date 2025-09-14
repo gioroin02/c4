@@ -98,7 +98,7 @@ pxLinuxSocketTcpGetAddress(PxLinuxSocketTcp* self)
 
             void* addr = pxSockIp4Addr(&self->address);
 
-            pxMemoryCopy(result.ip4.memory, addr,
+            pxMemoryCopy(result.ip4.items, addr,
                 PX_ADDRESS_IP4_GROUPS, 1);
         } break;
 
@@ -107,13 +107,13 @@ pxLinuxSocketTcpGetAddress(PxLinuxSocketTcp* self)
 
             void* addr = pxSockIp6Addr(&self->address);
 
-            pxMemoryCopy(result.ip6.memory, addr,
+            pxMemoryCopy(result.ip6.items, addr,
                 PX_ADDRESS_IP6_GROUPS, 2);
 
-            pxMemoryFlip(result.ip6.memory,
+            pxMemoryFlip(result.ip6.items,
                 PX_ADDRESS_IP6_GROUPS, 2);
 
-            pxMemoryFlip(result.ip6.memory,
+            pxMemoryFlip(result.ip6.items,
                 PX_ADDRESS_IP6_GROUPS * 2, 1);
         } break;
 
@@ -166,7 +166,7 @@ pxLinuxSocketTcpBind(PxLinuxSocketTcp* self, PxAddress address, pxu16 port)
             size           = PX_SOCK_IP4_SIZE;
 
             pxMemoryCopy(pxSockIp4Addr(&data),
-                address.ip4.memory, PX_ADDRESS_IP4_GROUPS, 1);
+                address.ip4.items, PX_ADDRESS_IP4_GROUPS, 1);
 
             pxMemoryCopyNetFromHost(pxSockIp4Port(&data),
                 &port, 1, 2);
@@ -177,7 +177,7 @@ pxLinuxSocketTcpBind(PxLinuxSocketTcp* self, PxAddress address, pxu16 port)
             size           = PX_SOCK_IP6_SIZE;
 
             pxMemoryCopy(pxSockIp6Addr(&data),
-                address.ip6.memory, PX_ADDRESS_IP6_GROUPS, 2);
+                address.ip6.items, PX_ADDRESS_IP6_GROUPS, 2);
 
             pxMemoryFlip(pxSockIp6Addr(&data),
                 PX_ADDRESS_IP6_GROUPS, 2);
@@ -221,7 +221,7 @@ pxLinuxSocketTcpConnect(PxLinuxSocketTcp* self, PxAddress address, pxu16 port)
             size           = PX_SOCK_IP4_SIZE;
 
             pxMemoryCopy(pxSockIp4Addr(&data),
-                address.ip4.memory, PX_ADDRESS_IP4_GROUPS, 1);
+                address.ip4.items, PX_ADDRESS_IP4_GROUPS, 1);
 
             pxMemoryCopyNetFromHost(pxSockIp4Port(&data),
                 &port, 1, 2);
@@ -232,7 +232,7 @@ pxLinuxSocketTcpConnect(PxLinuxSocketTcp* self, PxAddress address, pxu16 port)
             size           = PX_SOCK_IP6_SIZE;
 
             pxMemoryCopy(pxSockIp6Addr(&data),
-                address.ip6.memory, PX_ADDRESS_IP6_GROUPS, 2);
+                address.ip6.items, PX_ADDRESS_IP6_GROUPS, 2);
 
             pxMemoryFlip(pxSockIp6Addr(&data),
                 PX_ADDRESS_IP6_GROUPS, 2);

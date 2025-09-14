@@ -74,9 +74,7 @@ pxReaderPeekString8(PxReader* self, PxArena* arena, pxiword length)
     if (diff < length)
         pxArenaRewind(arena, offset + diff + 1);
 
-    return (PxString8) {
-        .memory = result, .length = diff,
-    };
+    return pxString8Make(result, diff);
 }
 
 PxString8
@@ -99,9 +97,7 @@ pxReaderPeekLine(PxReader* self, PxArena* arena, pxiword length)
     if (diff < length)
         pxArenaRewind(arena, offset + diff + 1);
 
-    return (PxString8) {
-        .memory = result, .length = diff,
-    };
+    return pxString8Make(result, diff);
 }
 
 pxu8
@@ -142,9 +138,7 @@ pxReaderString8(PxReader* self, PxArena* arena, pxiword length)
     if (diff < length)
         pxArenaRewind(arena, offset + diff + 1);
 
-    return (PxString8) {
-        .memory = result, .length = diff,
-    };
+    return pxString8Make(result, diff);
 }
 
 PxString8
@@ -169,9 +163,7 @@ pxReaderLine(PxReader* self, PxArena* arena, pxiword length)
     if (diff < length)
         pxArenaRewind(arena, offset + diff + 1);
 
-    return (PxString8) {
-        .memory = result, .length = diff,
-    };
+    return pxString8Make(result, diff);
 }
 
 #endif // PX_STREAM_READER_C

@@ -6,17 +6,19 @@
 PxQueue
 pxQueueReserveMemory(PxArena* arena, pxiword length, pxiword stride)
 {
-    if (length <= 0 || stride <= 0) return (PxQueue) {0};
+    PxQueue result = {0};
 
-    pxu8* memory = pxArenaReserveMemory(arena, length, stride);
+    if (length <= 0 || stride <= 0) return result;
 
-    if (memory == 0) return (PxQueue) {0};
+    result.memory =
+        pxArenaReserveMemory(arena, length, stride);
 
-    return (PxQueue) {
-        .memory = memory,
-        .length = length,
-        .stride = stride,
-    };
+    if (result.memory != 0) {
+        result.length = length;
+        result.stride = stride;
+    }
+
+    return result;
 }
 
 PxQueue

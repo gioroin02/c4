@@ -4,7 +4,7 @@
 #include "reader.h"
 
 PxJsonReader
-pxJsonReaderMake(PxArena* arena, pxiword length, PxReader reader)
+pxJsonReaderMake(PxArena* arena, pxiword length, PxReader* reader)
 {
     PxQueue stack =
         pxQueueReserve(arena, PxJsonLayerType, length);
@@ -17,28 +17,28 @@ pxJsonReaderMake(PxArena* arena, pxiword length, PxReader reader)
     };
 }
 
-PxJsonEvent
-pxJsonReaderNext(PxJsonReader* self, PxArena* arena)
+PxJsonMsg
+pxJsonReadMessage(PxJsonReader* self, PxArena* arena)
 {
-    PxJsonEvent     result = pxJsonEventCount();
+    PxJsonMsg     result = pxJsonMsgCount();
     PxJsonLayerType parent = PX_JSON_LAYER_NONE;
 
-    while (result.type == PX_JSON_EVENT_COUNT) {
+    while (result.type == PX_JSON_MSG_COUNT) {
         if (pxQueueReadTail(&self->stack, PxJsonLayerType, &parent) == 0)
             parent = PX_JSON_LAYER_NONE;
 
-        PxJsonToken token = pxJsonNext(&self->reader, arena);
+        PxJsonToken token = pxJsonNext(self->reader, arena);
 
         if (token.type == PX_JSON_TOKEN_COUNT) break;
 
         switch (token.type) {
             case PX_JSON_TOKEN_ERROR: {
-                result = pxJsonEventError(token.error.subject,
-                    token.error.message);
+                result = pxJsonMsgError(token.error.subject,
+                    token.error.content);
             } break;
 
             case PX_JSON_TOKEN_OBJECT_OPEN: {
-                result = pxJsonEventObjectOpen();
+                result = pxJsonMsgObjectOpen();
 
                 PxJsonLayerType layer = PX_JSON_LAYER_OBJECT;
 
@@ -51,7 +51,7 @@ pxJsonReaderNext(PxJsonReader* self, PxArena* arena)
             } break;
 
             case PX_JSON_TOKEN_OBJECT_CLOSE: {
-                result = pxJsonEventObjectClose();
+                result = pxJsonMsgObjectClose();
 
                 pxQueueDropTail(&self->stack);
 
@@ -61,7 +61,7 @@ pxJsonReaderNext(PxJsonReader* self, PxArena* arena)
             } break;
 
             case PX_JSON_TOKEN_ARRAY_OPEN: {
-                result = pxJsonEventArrayOpen();
+                result = pxJsonMsgArrayOpen();
 
                 PxJsonLayerType layer = PX_JSON_LAYER_ARRAY;
 
@@ -74,7 +74,7 @@ pxJsonReaderNext(PxJsonReader* self, PxArena* arena)
             } break;
 
             case PX_JSON_TOKEN_ARRAY_CLOSE: {
-                result = pxJsonEventArrayClose();
+                result = pxJsonMsgArrayClose();
 
                 pxQueueDropTail(&self->stack);
 
@@ -85,12 +85,12 @@ pxJsonReaderNext(PxJsonReader* self, PxArena* arena)
 
             case PX_JSON_TOKEN_COLON: {
                 if (parent == PX_JSON_LAYER_OBJECT) {
-                    token = pxJsonPeek(&self->reader, arena);
+                    token = pxJsonPeek(self->reader, arena);
 
                     switch (token.type) {
                         case PX_JSON_TOKEN_OBJECT_OPEN:
                         case PX_JSON_TOKEN_ARRAY_OPEN:
-                            result = pxJsonEventName(self->name);
+                            result = pxJsonMsgName(self->name);
                         break;
 
                         default: break;
@@ -109,49 +109,49 @@ pxJsonReaderNext(PxJsonReader* self, PxArena* arena)
 
             case PX_JSON_TOKEN_STRING: {
                 if (parent != PX_JSON_LAYER_OBJECT || self->colon != 0) {
-                    result = pxJsonEventString(
-                        token.value_string, self->name);
+                    result = pxJsonMsgString(
+                        token.string_8, self->name);
                 } else
-                    self->name = token.value_string;
+                    self->name = token.string_8;
 
                 self->colon = 0;
                 self->comma = 0;
             } break;
 
             case PX_JSON_TOKEN_UNSIGNED: {
-                result = pxJsonEventUnsigned(
-                    token.value_unsigned, self->name);
+                result = pxJsonMsgUnsigned(
+                    token.unsigned_word, self->name);
 
                 self->colon = 0;
                 self->comma = 0;
             } break;
 
             case PX_JSON_TOKEN_INTEGER: {
-                result = pxJsonEventInteger(
-                    token.value_integer, self->name);
+                result = pxJsonMsgInteger(
+                    token.integer_word, self->name);
 
                 self->colon = 0;
                 self->comma = 0;
             } break;
 
             case PX_JSON_TOKEN_FLOATING: {
-                result = pxJsonEventFloating(
-                    token.value_floating, self->name);
+                result = pxJsonMsgFloating(
+                    token.floating_word, self->name);
 
                 self->colon = 0;
                 self->comma = 0;
             } break;
 
             case PX_JSON_TOKEN_BOOLEAN: {
-                result = pxJsonEventBoolean(
-                    token.value_boolean, self->name);
+                result = pxJsonMsgBoolean(
+                    token.boolean_word, self->name);
 
                 self->colon = 0;
                 self->comma = 0;
             } break;
 
             case PX_JSON_TOKEN_NULL: {
-                result = pxJsonEventNull(self->name);
+                result = pxJsonMsgNull(self->name);
 
                 self->colon = 0;
                 self->comma = 0;
@@ -162,6 +162,17 @@ pxJsonReaderNext(PxJsonReader* self, PxArena* arena)
     }
 
     return result;
+}
+
+pxb8
+pxJsonExpectMessage(PxJsonReader* self, PxArena* arena, PxJsonMsgType type)
+{
+    PxJsonMsg result = pxJsonReadMessage(self, arena);
+
+    if (result.type != type)
+        return 0;
+
+    return 1;
 }
 
 #endif // PX_ENCODING_JSON_READER_C

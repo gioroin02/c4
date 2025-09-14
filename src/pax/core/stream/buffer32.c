@@ -6,27 +6,29 @@
 PxBuffer32
 pxBuffer32Make(pxu32* memory, pxiword length)
 {
-    if (memory == 0 || length <= 0)
-        return (PxBuffer32) {0};
+    PxBuffer32 result = {0};
 
-    return (PxBuffer32) {
-        .memory = memory,
-        .length = length,
-    };
+    if (memory != 0 || length > 0) {
+        result.memory = memory;
+        result.length = length;
+    }
+
+    return result;
 }
 
 PxBuffer32
 pxBuffer32MakeFull(pxu32* memory, pxiword length)
 {
-    if (memory == 0 || length <= 0)
-        return (PxBuffer32) {0};
+    PxBuffer32 result = {0};
 
-    return (PxBuffer32) {
-        .memory = memory,
-        .length = length,
-        .size   = length,
-        .tail   = length,
-    };
+    if (memory != 0 && length > 0) {
+        result.memory = memory;
+        result.length = length;
+        result.size   = length;
+        result.tail   = length;
+    }
+
+    return result;
 }
 
 PxBuffer32
@@ -329,7 +331,7 @@ pxBuffer32WriteMemory8Tail(PxBuffer32* self, pxu8* memory, pxiword length)
             pxiword j = self->tail + index + i;
 
             self->memory[j % self->length] =
-                utf32.memory[i];
+                utf32.items[i];
         }
 
         index += utf32.size;
@@ -373,7 +375,7 @@ pxBuffer32WriteMemory16Tail(PxBuffer32* self, pxu16* memory, pxiword length)
             pxiword j = self->tail + index + i;
 
             self->memory[j % self->length] =
-                utf32.memory[i];
+                utf32.items[i];
         }
 
         index += utf32.size;
@@ -442,12 +444,10 @@ pxBuffer32ReadString32Head(PxBuffer32* self, PxArena* arena, pxiword length)
     pxu32* result = pxArenaReserve(arena, pxu32, size + 1);
 
     if (result != 0) {
-        pxBuffer32ReadMemory32Head(self, result, size);
+        pxBuffer32ReadMemory32Head(self,
+            result, size);
 
-        return (PxString32) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString32Make(result, size);
     }
 
     return (PxString32) {0};
@@ -504,12 +504,10 @@ pxBuffer32ReadString32Tail(PxBuffer32* self, PxArena* arena, pxiword length)
     pxu32* result = pxArenaReserve(arena, pxu32, size + 1);
 
     if (result != 0) {
-        pxBuffer32ReadMemory32Tail(self, result, size);
+        pxBuffer32ReadMemory32Tail(self,
+            result, size);
 
-        return (PxString32) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString32Make(result, size);
     }
 
     return (PxString32) {0};
@@ -556,12 +554,10 @@ pxBuffer32PeekString32Head(PxBuffer32* self, PxArena* arena, pxiword length)
     pxu32* result = pxArenaReserve(arena, pxu32, size + 1);
 
     if (result != 0) {
-        pxBuffer32PeekMemory32Head(self, result, size);
+        pxBuffer32PeekMemory32Head(self,
+            result, size);
 
-        return (PxString32) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString32Make(result, size);
     }
 
     return (PxString32) {0};
@@ -614,12 +610,10 @@ pxBuffer32PeekString32Tail(PxBuffer32* self, PxArena* arena, pxiword length)
     pxu32* result = pxArenaReserve(arena, pxu32, size + 1);
 
     if (result != 0) {
-        pxBuffer32PeekMemory32Tail(self, result, size);
+        pxBuffer32PeekMemory32Tail(self,
+            result, size);
 
-        return (PxString32) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString32Make(result, size);
     }
 
     return (PxString32) {0};

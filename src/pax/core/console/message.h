@@ -1,21 +1,21 @@
-#ifndef PX_CONSOLE_EVENT_H
-#define PX_CONSOLE_EVENT_H
+#ifndef PX_CORE_CONSOLE_MESSAGE_H
+#define PX_CORE_CONSOLE_MESSAGE_H
 
-#include "escape.h"
+#include "import.h"
 
-typedef enum PxConsoleEventType
+typedef enum PxConsoleMsgType
 {
-    PX_CONSOLE_EVENT_NONE,
+    PX_CONSOLE_MSG_NONE,
 
-    PX_CONSOLE_EVENT_KEYBD_PRESS,
-    PX_CONSOLE_EVENT_KEYBD_RELEASE,
+    PX_CONSOLE_MSG_KEYBD_PRESS,
+    PX_CONSOLE_MSG_KEYBD_RELEASE,
 
-    PX_CONSOLE_EVENT_MOUSE_PRESS,
-    PX_CONSOLE_EVENT_MOUSE_RELEASE,
-    PX_CONSOLE_EVENT_MOUSE_MOVE,
-    PX_CONSOLE_EVENT_MOUSE_SCROLL,
+    PX_CONSOLE_MSG_MOUSE_PRESS,
+    PX_CONSOLE_MSG_MOUSE_RELEASE,
+    PX_CONSOLE_MSG_MOUSE_MOVE,
+    PX_CONSOLE_MSG_MOUSE_SCROLL,
 }
-PxConsoleEventType;
+PxConsoleMsgType;
 
 typedef enum PxConsoleKeybdModif
 {
@@ -106,71 +106,77 @@ typedef enum PxConsoleMouseBtn
 }
 PxConsoleMouseBtn;
 
-typedef struct PxConsoleEventKeybdPress
+typedef struct PxConsoleMsgKeybdPress
 {
     pxiword button;
     pxuword modifs;
     pxi32   unicode;
 }
-PxConsoleEventKeybdPress;
+PxConsoleMsgKeybdPress;
 
-typedef struct PxConsoleEventKeybdRelease
+typedef struct PxConsoleMsgKeybdRelease
 {
     pxiword button;
     pxuword modifs;
     pxi32   unicode;
 }
-PxConsoleEventKeybdRelease;
+PxConsoleMsgKeybdRelease;
 
-typedef struct PxConsoleEventMousePress
+typedef struct PxConsoleMsgMousePress
 {
     pxiword button;
     pxuword modifs;
 }
-PxConsoleEventMousePress;
+PxConsoleMsgMousePress;
 
-typedef struct PxConsoleEventMouseRelease
+typedef struct PxConsoleMsgMouseRelease
 {
     pxiword button;
     pxuword modifs;
 }
-PxConsoleEventMouseRelease;
+PxConsoleMsgMouseRelease;
 
-typedef struct PxConsoleEventMouseMove
+typedef struct PxConsoleMsgMouseMove
 {
     pxiword x;
     pxiword y;
 }
-PxConsoleEventMouseMove;
+PxConsoleMsgMouseMove;
 
-typedef struct PxConsoleEventMouseScroll
+typedef struct PxConsoleMsgMouseScroll
 {
     pxiword x;
     pxiword y;
 }
-PxConsoleEventMouseScroll;
+PxConsoleMsgMouseScroll;
 
-typedef struct PxConsoleEvent
+typedef struct PxConsoleMsg
 {
-    PxConsoleEventType type;
+    PxConsoleMsgType type;
 
     union
     {
-        PxConsoleEventKeybdPress   keybd_press;
-        PxConsoleEventKeybdRelease keybd_release;
+        PxConsoleMsgKeybdPress   keybd_press;
+        PxConsoleMsgKeybdRelease keybd_release;
 
-        PxConsoleEventMousePress   mouse_press;
-        PxConsoleEventMouseRelease mouse_release;
-        PxConsoleEventMouseMove    mouse_move;
-        PxConsoleEventMouseScroll  mouse_scroll;
+        PxConsoleMsgMousePress   mouse_press;
+        PxConsoleMsgMouseRelease mouse_release;
+        PxConsoleMsgMouseMove    mouse_move;
+        PxConsoleMsgMouseScroll  mouse_scroll;
     };
 }
-PxConsoleEvent;
+PxConsoleMsg;
 
-PxConsoleEvent
-pxConsoleEventKeybdPress(pxiword button, pxuword modifs, pxi32 unicode);
+PxConsoleMsg
+pxConsoleMsgKeybdPress(pxiword button, pxuword modifs, pxi32 unicode);
 
-PxConsoleEvent
-pxConsoleEventKeybdRelease(pxiword button, pxuword modifs, pxi32 unicode);
+PxConsoleMsg
+pxConsoleMsgKeybdRelease(pxiword button, pxuword modifs, pxi32 unicode);
 
-#endif // PX_CONSOLE_EVENT_H
+PxConsoleMsg
+pxConsoleReadMessage(PxReader* reader);
+
+PxConsoleMsg
+pxConsolePollMessage(PxReader* reader);
+
+#endif // PX_CORE_CONSOLE_MESSAGE_H

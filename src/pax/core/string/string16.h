@@ -3,8 +3,7 @@
 
 #include "utf16.h"
 
-#define pxs16(x) \
-    ((PxString16) {.memory = pxCast(pxu16*, x), .length = pxSize(x) / 2 - 1})
+#define pxs16(x) (PxString16) {.memory = pxCast(pxu16*, x), .length = pxSizeArray(pxu16, x) - 1}
 
 typedef struct PxString16
 {
@@ -12,6 +11,9 @@ typedef struct PxString16
     pxiword length;
 }
 PxString16;
+
+PxString16
+pxString16Make(pxu16* memory, pxiword length);
 
 PxString16
 pxString16FromMemory(void* memory, pxiword length);
@@ -69,6 +71,12 @@ pxString16Slice(PxString16 self, pxiword start, pxiword stop);
 
 PxString16
 pxString16SliceLength(PxString16 self, pxiword index, pxiword length);
+
+PxString16
+pxString16SliceHead(PxString16 self, pxiword head);
+
+PxString16
+pxString16SliceTail(PxString16 self, pxiword tail);
 
 PxString16
 pxString16TrimSpaces(PxString16 self);

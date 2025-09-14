@@ -21,12 +21,12 @@ pxAddressIp4FromString8(PxAddressIp4* self, PxString8 string)
     for (pxiword i = 0; i < PX_ADDRESS_IP4_GROUPS; i += 1) {
         pxString8Split(right, pxs8("."), &left, &right);
 
-        if (pxUnsigned8FromString8(&temp.memory[i], 10, options, left) == 0)
+        if (pxUnsigned8FromString8(&temp.items[i], 10, options, left) == 0)
             return 0;
     }
 
     if (self != 0)
-        pxMemoryCopy(self->memory, temp.memory, PX_ADDRESS_IP4_GROUPS, 1);
+        pxMemoryCopy(self->items, temp.items, PX_ADDRESS_IP4_GROUPS, 1);
 
     return 1;
 }
@@ -34,7 +34,7 @@ pxAddressIp4FromString8(PxAddressIp4* self, PxString8 string)
 pxb8
 pxAddressIp4IsEqual(PxAddressIp4 self, PxAddressIp4 value)
 {
-    return pxMemoryIsEqual(self.memory, value.memory,
+    return pxMemoryIsEqual(self.items, value.items,
         PX_ADDRESS_IP4_GROUPS, 1);
 }
 

@@ -6,13 +6,14 @@
 PxArena
 pxArenaMake(pxu8* memory, pxiword length)
 {
-    if (memory == 0 || length <= 0)
-        return (PxArena) {0};
+    PxArena result = {0};
 
-    return (PxArena) {
-        .memory = memory,
-        .length = length,
-    };
+    if (memory != 0 && length > 0) {
+        result.memory = memory;
+        result.length = length;
+    }
+
+    return result;
 }
 
 void*

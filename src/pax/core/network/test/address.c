@@ -27,7 +27,7 @@ showAddressFromString8(PxString8 string, PxAddressType type)
                 string.memory, state ? TRUE : FALSE);
 
             for (pxiword i = 0; i < PX_ADDRESS_IP4_GROUPS; i += 1)
-                printf("%4u ", value.ip4.memory[i]);
+                printf("%4u ", value.ip4.items[i]);
             printf("\n");
         } break;
 
@@ -36,7 +36,7 @@ showAddressFromString8(PxString8 string, PxAddressType type)
                 string.memory, state ? TRUE : FALSE);
 
             for (pxiword i = 0; i < PX_ADDRESS_IP6_GROUPS; i += 1)
-                printf("%4x ", value.ip6.memory[i]);
+                printf("%4x ", value.ip6.items[i]);
             printf("\n");
         } break;
 

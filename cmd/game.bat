@@ -3,6 +3,7 @@ echo off
 cls
 
 set "base=src\pax\core\base\export.c"
+set "time=src\pax\core\time\export.c"
 set "memory=src\pax\core\memory\export.c"
 set "string=src\pax\core\string\export.c"
 set "format=src\pax\core\format\export.c"
@@ -15,13 +16,15 @@ set "structure=src\pax\core\structure\export.c"
 
 set "json=src\pax\encoding\json\export.c"
 
-set "pax=%base% %memory% %string% %format% %stream% %logging% %network% %storage% %console% %structure% %json%"
+set "core=%base% %time% %memory% %string% %format% %stream% %logging% %network% %storage% %console% %structure%"
+set "encoding=%json%"
 
 set "winsock=-lws2_32"
 
 set "lib=%winsock%"
+set "src=%core% %encoding% src\game\export.c"
 set "dir=src\game\test"
-set "src=%pax% src\game\export.c"
 
-zig cc %src% "%dir%\board.c" %lib%   -o board.exe
-zig cc %src% "%dir%\message.c" %lib% -o message.exe
+zig cc %src% "%dir%\color.c" %lib%   -o game_color.exe
+zig cc %src% "%dir%\message.c" %lib% -o game_message.exe
+zig cc %src% "%dir%\board.c" %lib%   -o game_board.exe

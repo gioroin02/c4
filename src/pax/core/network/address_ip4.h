@@ -8,16 +8,14 @@
 
 #define PX_ADDRESS_IP4_GROUPS pxCast(pxiword, 4)
 
-typedef struct PxAddressIp4
+typedef union PxAddressIp4
 {
-    union
+    struct
     {
-        struct {
-            pxu8 a, b, c, d;
-        };
-
-        pxu8 memory[PX_ADDRESS_IP4_GROUPS];
+        pxu8 a, b, c, d;
     };
+
+    pxu8 items[PX_ADDRESS_IP4_GROUPS];
 }
 PxAddressIp4;
 

@@ -4,22 +4,29 @@
 #include "string8.h"
 
 PxString8
+pxString8Make(pxu8* memory, pxiword length)
+{
+    PxString8 result = {0};
+
+    if (memory != 0 && length > 0) {
+        result.memory = memory;
+        result.length = length;
+    }
+
+    return result;
+}
+
+PxString8
 pxString8FromMemory(void* memory, pxiword length)
 {
     for (pxiword i = 0; i < length; i += 1) {
         if (pxCast(pxu8*, memory)[i] != 0)
             continue;
 
-        return (PxString8) {
-            .memory = memory,
-            .length = i,
-        };
+        return pxString8Make(memory, i);
     }
 
-    return (PxString8) {
-        .memory = memory,
-        .length = length,
-    };
+    return pxString8Make(memory, length);
 }
 
 PxString8
@@ -33,10 +40,7 @@ pxString8CopyUnicode(PxArena* arena, pxi32 value)
 
     pxUtf8WriteMemory8Forw(result, length, 0, value);
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 PxString8
@@ -55,10 +59,7 @@ pxString8CopyMemory8(PxArena* arena, pxu8* memory, pxiword length)
 
     pxMemoryCopy(result, memory, length, 1);
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 PxString8
@@ -70,18 +71,15 @@ pxString8Chain(PxString8 self, PxArena* arena, PxString8 value)
 PxString8
 pxString8ChainMemory8(PxString8 self, PxArena* arena, pxu8* memory, pxiword length)
 {
-    pxu8* result = pxArenaReserve(arena,
-        pxu8, self.length + length + 1);
+    pxu8* result =
+        pxArenaReserve(arena, pxu8, self.length + length + 1);
 
     if (result == 0) return (PxString8) {0};
 
     pxMemoryCopy(result, self.memory, self.length, 1);
     pxMemoryCopy(result + self.length, memory, length, 1);
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 PxString8
@@ -115,10 +113,7 @@ pxString8Replace(PxString8 self, PxArena* arena, PxString8 value, PxString8 othe
     for (pxiword j = start; j < self.length; j += 1)
         result[j] = self.memory[j];
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 pxb8
@@ -226,10 +221,19 @@ pxString8SliceLength(PxString8 self, pxiword index, pxiword length)
 
     pxu8* memory = self.memory + index;
 
-    return (PxString8) {
-        .memory = memory,
-        .length = length,
-    };
+    return pxString8Make(memory, length);
+}
+
+PxString8
+pxString8SliceHead(PxString8 self, pxiword head)
+{
+    return pxString8Slice(self, head, self.length);
+}
+
+PxString8
+pxString8SliceTail(PxString8 self, pxiword tail)
+{
+    return pxString8Slice(self, 0, tail);
 }
 
 PxString8

@@ -8,17 +8,15 @@
 
 #define PX_ADDRESS_IP6_GROUPS pxCast(pxiword, 8)
 
-typedef struct PxAddressIp6
+typedef union PxAddressIp6
 {
-    union
+    struct
     {
-        struct {
-            pxu16 a, b, c, d;
-            pxu16 e, f, g, h;
-        };
-
-        pxu16 memory[PX_ADDRESS_IP6_GROUPS];
+        pxu16 a, b, c, d;
+        pxu16 e, f, g, h;
     };
+
+    pxu16 items[PX_ADDRESS_IP6_GROUPS];
 }
 PxAddressIp6;
 

@@ -3,72 +3,61 @@
 
 #include "client.h"
 
-#include <stdio.h>
-
-#define COLOR_RESET "\x1b[0m"
-
-#define FRONT_RED    "\x1b[31m"
-#define FRONT_GREEN  "\x1b[32m"
-#define FRONT_YELLOW "\x1b[33m"
-#define FRONT_BLUE   "\x1b[34m"
-#define FRONT_PURPLE "\x1b[35m"
-#define FRONT_AZURE  "\x1b[36m"
-
-#define RED(expr)    FRONT_RED    expr COLOR_RESET
-#define GREEN(expr)  FRONT_GREEN  expr COLOR_RESET
-#define YELLOW(expr) FRONT_YELLOW expr COLOR_RESET
-#define BLUE(expr)   FRONT_BLUE   expr COLOR_RESET
-#define PURPLE(expr) FRONT_PURPLE expr COLOR_RESET
-#define AZURE(expr)  FRONT_AZURE  expr COLOR_RESET
-
-#define FATAL PURPLE("FATAL")
-#define ERROR RED("ERROR")
-#define WARN  YELLOW("WARN")
-#define INFO  BLUE("INFO")
-#define DEBUG GREEN("DEBUG")
-#define TRACE AZURE("TRACE")
-
 C4Client
-c4ClientMake(PxArena* arena, PxAddressType type)
+c4ClientMake(PxArena* arena, pxiword length, PxAddressType type)
 {
-    return (C4Client) {
-        .socket = pxSocketTcpCreate(arena, type),
-    };
+    C4Client result = {0};
+
+    result.socket = pxSocketTcpCreate(arena, type);
+
+    if (result.socket != 0) {
+        result.reader = pxSocketTcpReader(result.socket, arena, length);
+        result.writer = pxSocketTcpWriter(result.socket, arena, length);
+    }
+
+    return result;
 }
 
 pxb8
 c4ClientStart(C4Client* self, PxAddress address, pxu16 port)
 {
-    printf(TRACE " Apertura sessione con {addr = [");
-
     switch (address.type) {
         case PX_ADDRESS_TYPE_IP4: {
-            for (pxiword i = 0; i < PX_ADDRESS_IP4_GROUPS; i += 1) {
-                printf(YELLOW("%u"), address.ip4.memory[i]);
+            pxu8 format[] = "Apertura sessione con {addr = [${0}.${1}.${2}.${3}], port = ${4}} ...\n";
 
-                if (i + 1 != PX_ADDRESS_IP4_GROUPS)
-                    printf(YELLOW("."));
-            }
+            pxLoggerTrace(LOGGER, format,
+                pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.a),
+                pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.b),
+                pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.c),
+                pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.d),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, port));
         } break;
 
         case PX_ADDRESS_TYPE_IP6: {
-            for (pxiword i = 0; i < PX_ADDRESS_IP6_GROUPS; i += 1) {
-                printf(YELLOW("%x"), address.ip6.memory[i]);
+            pxu8 format[] =
+                "Apertura sessione con {addr = [${0}:${1}:${2}:${3}:${4}:${5}:${6}:${7}], port = ${8}} ...\n";
 
-                if (i + 1 != PX_ADDRESS_IP6_GROUPS)
-                    printf(YELLOW(":"));
-            }
+            pxLoggerTrace(LOGGER, format,
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.a),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.b),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.c),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.d),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.e),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.f),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.g),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.h),
+                pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, port));
         } break;
 
         default: break;
     }
 
-    printf("], port = " YELLOW("%u") "}: ", port);
-
     pxb8 state = pxSocketTcpConnect(self->socket, address, port);
 
-    printf("%s\n", state != 0 ?
-        GREEN("SUCCEDED") : RED("FAILED"));
+    if (state != 0)
+        pxLoggerInfo(LOGGER, "Apertura sessione riuscita\n", {0});
+    else
+        pxLoggerError(LOGGER, "Apertura sessione fallita\n", {0});
 
     return state;
 }
@@ -86,21 +75,22 @@ c4ClientStop(C4Client* self)
 pxb8
 c4ClientWrite(C4Client* self, PxArena* arena, C4Msg value)
 {
-    printf(TRACE " Scrittura di ");
+    pxLoggerTrace(LOGGER, "Scrittura di ${0}\n",
+        pxFormatCmdDelegate(&value, &c4FormatProcMsg));
 
     pxiword offset = pxArenaOffset(arena);
 
-    c4LogMsg(&value);
-
-    PxJsonWriter writer = pxJsonWriterMake(arena, 4,
-        pxSocketTcpWriter(self->socket, &self->response));
+    PxJsonWriter writer =
+        pxJsonWriterMake(arena, 4, &self->writer);
 
     pxb8 state = c4JsonWriteMsg(&value, &writer, arena);
 
     pxArenaRewind(arena, offset);
 
-    printf("%s\n", state != 0 ?
-        GREEN("SUCCEDED") : RED("FAILED"));
+    if (state != 0)
+        pxLoggerInfo(LOGGER, "Scrittura riuscita\n", {0});
+    else
+        pxLoggerError(LOGGER, "Scrittura fallita\n", {0});
 
     return state;
 }
@@ -108,22 +98,25 @@ c4ClientWrite(C4Client* self, PxArena* arena, C4Msg value)
 C4Msg
 c4ClientRead(C4Client* self, PxArena* arena)
 {
-    printf(TRACE " Lettura di... ");
+    pxLoggerTrace(LOGGER, "Attesa di un messaggio ...\n", {0});
 
-    C4Msg result = {0};
-    pxiword   offset = pxArenaOffset(arena);
+    C4Msg   result = {0};
+    pxiword offset = pxArenaOffset(arena);
 
-    PxJsonReader reader = pxJsonReaderMake(arena, 4,
-        pxSocketTcpReader(self->socket, &self->request));
+    PxJsonReader reader =
+        pxJsonReaderMake(arena, 4, &self->reader);
 
     pxb8 state = c4JsonReadMsg(&result, &reader, arena);
 
-    c4LogMsg(&result);
+    pxLoggerTrace(LOGGER, "Lettura di ${0}\n",
+        pxFormatCmdDelegate(&result, &c4FormatProcMsg));
 
     pxArenaRewind(arena, offset);
 
-    printf("%s\n", state != 0 ?
-        GREEN("SUCCEDED") : RED("FAILED"));
+    if (state != 0)
+        pxLoggerInfo(LOGGER, "Lettura riuscita\n", {0});
+    else
+        pxLoggerError(LOGGER, "Lettura fallita\n", {0});
 
     return result;
 }

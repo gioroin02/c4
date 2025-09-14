@@ -11,4 +11,6 @@
 #include "string16.h"
 #include "string32.h"
 
+#include "builder.h"
+
 #endif // PX_CORE_FORMAT_EXPORT_H

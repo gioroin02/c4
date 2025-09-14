@@ -6,7 +6,7 @@
 typedef struct PxLinuxConsole PxLinuxConsole;
 
 PxLinuxConsole*
-pxLinuxConsoleCreate(PxArena* arena, pxiword length);
+pxLinuxConsoleCreate(PxArena* arena);
 
 pxb8
 pxLinuxConsoleModeDefault(PxLinuxConsole* self);
@@ -19,11 +19,5 @@ pxLinuxConsoleWriteMemory(PxLinuxConsole* self, void* memory, pxiword amount, px
 
 pxiword
 pxLinuxConsoleReadMemory(PxLinuxConsole* self, void* memory, pxiword amount, pxiword stride);
-
-PxConsoleEvent
-pxLinuxConsoleReadEvent(PxLinuxConsole* self);
-
-PxConsoleEvent
-pxLinuxConsolePollEvent(PxLinuxConsole* self);
 
 #endif // PX_LINUX_CONSOLE_CONSOLE_H

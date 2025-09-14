@@ -258,10 +258,7 @@ pxString8FromPath(PxArena* arena, PxPath* value, PxString8 pivot)
         }
     }
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 PxString16
@@ -305,10 +302,7 @@ pxString16FromPath(PxArena* arena, PxPath* value, PxString16 pivot)
         }
     }
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 PxString32
@@ -352,10 +346,7 @@ pxString32FromPath(PxArena* arena, PxPath* value, PxString32 pivot)
         }
     }
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 #endif // PX_CORE_STORAGE_PATH_C

@@ -82,6 +82,46 @@ pxMagnitudeFloating(pxfword value)
 }
 
 pxi8
+pxDirectionUnsigned8(pxu8 value)
+{
+    if (value > 0) return +1;
+
+    return 0;
+}
+
+pxi8
+pxDirectionUnsigned16(pxu16 value)
+{
+    if (value > 0) return +1;
+
+    return 0;
+}
+
+pxi8
+pxDirectionUnsigned32(pxu32 value)
+{
+    if (value > 0) return +1;
+
+    return 0;
+}
+
+pxi8
+pxDirectionUnsigned64(pxu64 value)
+{
+    if (value > 0) return +1;
+
+    return 0;
+}
+
+pxi8
+pxDirectionUnsigned(pxuword value)
+{
+    if (value > 0) return +1;
+
+    return 0;
+}
+
+pxi8
 pxDirectionInteger8(pxi8 value)
 {
     if (value > 0) return +1;

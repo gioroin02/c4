@@ -1,7 +1,7 @@
 #ifndef C4_MESSAGE_MESSAGE_H
 #define C4_MESSAGE_MESSAGE_H
 
-#include "import.h"
+#include "player.h"
 
 typedef enum C4MsgType
 {
@@ -33,20 +33,20 @@ typedef struct C4MsgPlayerAccept
 {
     pxiword player_number;
 
-    pxuword player_code;
-    pxu8    piece_color;
-    pxu8    piece_shape;
+    pxuword   player_code;
+    C4Color   player_color;
+    PxString8 player_text;
 
     pxiword board_width;
     pxiword board_height;
 }
 C4MsgPlayerAccept;
 
-typedef struct C4MsgPlayerListItem
+typedef struct C4MsgPlayerData
 {
-    pxuword player_code;
-    pxu8    piece_color;
-    pxu8    piece_shape;
+    pxuword   player_code;
+    C4Color   player_color;
+    PxString8 player_text;
 }
 C4MsgPlayerData;
 
@@ -96,10 +96,10 @@ C4Msg
 c4MsgPlayerJoin(pxb8 player_is_automatic);
 
 C4Msg
-c4MsgPlayerAccept(pxiword player_number, pxuword player_code, pxu8 piece_color, pxu8 piece_shape, pxiword board_width, pxiword board_height);
+c4MsgPlayerAccept(pxiword player_number, C4GamePlayer player, pxiword board_width, pxiword board_height);
 
 C4Msg
-c4MsgPlayerData(pxuword player_code, pxu8 piece_color, pxu8 piece_shape);
+c4MsgPlayerData(C4GamePlayer player);
 
 C4Msg
 c4MsgPlayerTurn(pxuword player_code);
@@ -176,31 +176,31 @@ c4JsonReadMsgGameStop(C4MsgGameStop* self, PxJsonReader* reader, PxArena* arena)
 
 /* Console output */
 
-void
-c4LogMsg(C4Msg* self, PxLogger* logger);
+pxiword
+c4FormatProcMsg(C4Msg* self, PxBuilder* builder);
 
-void
-c4LogMsgPlayerJoin(C4MsgPlayerJoin* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgPlayerJoin(C4MsgPlayerJoin* self, PxBuilder* builder);
 
-void
-c4LogMsgPlayerAccept(C4MsgPlayerAccept* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgPlayerAccept(C4MsgPlayerAccept* self, PxBuilder* builder);
 
-void
-c4LogMsgPlayerData(C4MsgPlayerData* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgPlayerData(C4MsgPlayerData* self, PxBuilder* builder);
 
-void
-c4LogMsgPlayerTurn(C4MsgPlayerTurn* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgPlayerTurn(C4MsgPlayerTurn* self, PxBuilder* builder);
 
-void
-c4LogMsgPlayerChoice(C4MsgPlayerChoice* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgPlayerChoice(C4MsgPlayerChoice* self, PxBuilder* builder);
 
-void
-c4LogMsgPlayerSkip(C4MsgPlayerSkip* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgPlayerSkip(C4MsgPlayerSkip* self, PxBuilder* builder);
 
-void
-c4LogMsgGameStart(void* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgGameStart(void* self, PxBuilder* builder);
 
-void
-c4LogMsgGameStop(C4MsgGameStop* self, PxLogger* logger);
+pxiword
+c4FormatProcMsgGameStop(C4MsgGameStop* self, PxBuilder* builder);
 
 #endif // C4_MESSAGE_MESSAGE_H

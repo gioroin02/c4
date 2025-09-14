@@ -6,7 +6,7 @@
 typedef struct PxWindowsConsole PxWindowsConsole;
 
 PxWindowsConsole*
-pxWindowsConsoleCreate(PxArena* arena, pxiword length);
+pxWindowsConsoleCreate(PxArena* arena);
 
 pxb8
 pxWindowsConsoleModeDefault(PxWindowsConsole* self);
@@ -19,11 +19,5 @@ pxWindowsConsoleWriteMemory(PxWindowsConsole* self, void* memory, pxiword amount
 
 pxiword
 pxWindowsConsoleReadMemory(PxWindowsConsole* self, void* memory, pxiword amount, pxiword stride);
-
-PxConsoleEvent
-pxWindowsConsoleReadEvent(PxWindowsConsole* self);
-
-PxConsoleEvent
-pxWindowsConsolePollEvent(PxWindowsConsole* self);
 
 #endif // PX_WINDOWS_CONSOLE_CONSOLE_H

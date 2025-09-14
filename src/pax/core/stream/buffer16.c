@@ -6,27 +6,29 @@
 PxBuffer16
 pxBuffer16Make(pxu16* memory, pxiword length)
 {
-    if (memory == 0 || length <= 0)
-        return (PxBuffer16) {0};
+    PxBuffer16 result = {0};
 
-    return (PxBuffer16) {
-        .memory = memory,
-        .length = length,
-    };
+    if (memory != 0 && length > 0) {
+        result.memory = memory;
+        result.length = length;
+    }
+
+    return result;
 }
 
 PxBuffer16
 pxBuffer16MakeFull(pxu16* memory, pxiword length)
 {
-    if (memory == 0 || length <= 0)
-        return (PxBuffer16) {0};
+    PxBuffer16 result = {0};
 
-    return (PxBuffer16) {
-        .memory = memory,
-        .length = length,
-        .size   = length,
-        .tail   = length,
-    };
+    if (memory != 0 || length > 0) {
+        result.memory = memory;
+        result.length = length;
+        result.size   = length;
+        result.tail   = length;
+    }
+
+    return result;
 }
 
 PxBuffer16
@@ -354,12 +356,10 @@ pxBuffer16ReadString16Head(PxBuffer16* self, PxArena* arena, pxiword length)
     pxu16* result = pxArenaReserve(arena, pxu16, size + 1);
 
     if (result != 0) {
-        pxBuffer16ReadMemory16Head(self, result, size);
+        pxBuffer16ReadMemory16Head(self,
+            result, size);
 
-        return (PxString16) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString16Make(result, size);
     }
 
     return (PxString16) {0};
@@ -416,12 +416,10 @@ pxBuffer16ReadString16Tail(PxBuffer16* self, PxArena* arena, pxiword length)
     pxu16* result = pxArenaReserve(arena, pxu16, size + 1);
 
     if (result != 0) {
-        pxBuffer16ReadMemory16Tail(self, result, size);
+        pxBuffer16ReadMemory16Tail(self,
+            result, size);
 
-        return (PxString16) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString16Make(result, size);
     }
 
     return (PxString16) {0};
@@ -468,12 +466,10 @@ pxBuffer16PeekString16Head(PxBuffer16* self, PxArena* arena, pxiword length)
     pxu16* result = pxArenaReserve(arena, pxu16, size + 1);
 
     if (result != 0) {
-        pxBuffer16PeekMemory16Head(self, result, size);
+        pxBuffer16PeekMemory16Head(self,
+            result, size);
 
-        return (PxString16) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString16Make(result, size);
     }
 
     return (PxString16) {0};
@@ -526,12 +522,10 @@ pxBuffer16PeekString16Tail(PxBuffer16* self, PxArena* arena, pxiword length)
     pxu16* result = pxArenaReserve(arena, pxu16, size + 1);
 
     if (result != 0) {
-        pxBuffer16PeekMemory16Tail(self, result, size);
+        pxBuffer16PeekMemory16Tail(self,
+            result, size);
 
-        return (PxString16) {
-            .memory = result,
-            .length = size,
-        };
+        return pxString16Make(result, size);
     }
 
     return (PxString16) {0};

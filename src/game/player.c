@@ -3,6 +3,16 @@
 
 #include "player.h"
 
+C4GamePlayer
+c4GamePlayer(pxuword code, C4Color color, PxString8 text)
+{
+    return (C4GamePlayer) {
+        .code  = code,
+        .color = color,
+        .text  = text,
+    };
+}
+
 C4GamePlayerList
 c4GamePlayerListReserve(PxArena* arena, pxiword length)
 {
@@ -74,6 +84,15 @@ pxb8
 c4GamePlayerListRead(C4GamePlayerList* self, pxiword index, C4GamePlayer* value)
 {
     return pxArrayRead(&self->items, index, C4GamePlayer, value);
+}
+
+C4GamePlayer
+c4GamePlayerListReadOr(C4GamePlayerList* self, pxiword index, C4GamePlayer value)
+{
+    c4GamePlayerListRead(self,
+        index, &value);
+
+    return value;
 }
 
 #endif // C4_GAME_PLAYER_C

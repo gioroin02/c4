@@ -2,7 +2,8 @@
 #define PX_ENCODING_JSON_EXPORT_C
 
 #include "token.c"
-#include "event.c"
+
+#include "message.c"
 
 #include "reader.c"
 #include "writer.c"

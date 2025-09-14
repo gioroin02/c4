@@ -32,36 +32,36 @@ Entity;
 void
 jsonReadEntity(Entity* self, PxJsonReader* reader, PxArena* arena)
 {
-    PxJsonEvent event = pxJsonReaderNext(reader, arena);
+    if (pxJsonExpectMessage(reader, arena, PX_JSON_MSG_OBJECT_OPEN) == 0)
+        return;
 
-    if (event.type != PX_JSON_EVENT_OBJECT_OPEN) return;
+    PxJsonMsg message = pxJsonReadMessage(reader, arena);
 
-    event = pxJsonReaderNext(reader, arena);
-
-    while (event.type != PX_JSON_EVENT_OBJECT_CLOSE) {
-        switch (event.type) {
-            case PX_JSON_EVENT_STRING: {
-                if (pxString8IsEqual(event.name, pxs8("name")))
-                    self->name = event.value_string;
+    while (message.type != PX_JSON_MSG_OBJECT_CLOSE) {
+        switch (message.type) {
+            case PX_JSON_MSG_STRING: {
+                if (pxString8IsEqual(message.name, pxs8("name")))
+                    self->name = message.string_8;
             } break;
 
-            case PX_JSON_EVENT_UNSIGNED: {
-                if (pxString8IsEqual(event.name, pxs8("code")))
-                    self->code = event.value_unsigned;
+            case PX_JSON_MSG_UNSIGNED: {
+                if (pxString8IsEqual(message.name, pxs8("code")))
+                    self->code = message.unsigned_word;
             } break;
 
             default: break;
         }
 
-        event = pxJsonReaderNext(reader, arena);
+        message = pxJsonReadMessage(reader, arena);
     }
 }
 
 int
 main(int argc, char** argv)
 {
-    PxArena   arena  = pxMemoryReserve(16);
-    PxBuffer8 source = pxBuffer8Reserve(&arena, 256);
+    PxArena   arena       = pxMemoryReserve(16);
+    PxBuffer8 source      = pxBuffer8Reserve(&arena, 256);
+    PxReader  buff_reader = pxBufferReader(&source, &arena, 256);
 
     Entity entity = {0};
 
@@ -72,8 +72,8 @@ main(int argc, char** argv)
 
     printf("\n");
 
-    PxJsonReader reader = pxJsonReaderMake(&arena, 16,
-        pxBufferReader(&source, &arena, 256));
+    PxJsonReader reader =
+        pxJsonReaderMake(&arena, 16, &buff_reader);
 
     jsonReadEntity(&entity, &reader, &arena);
 

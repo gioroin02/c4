@@ -7,34 +7,45 @@ main(int argc, char** argv)
 {
     PxArena arena = pxMemoryReserve(16);
 
-    PxConsole console = pxConsoleCreate(&arena, 1024);
+    PxConsole console = pxConsoleCreate(&arena);
     PxWriter  writer  = pxConsoleWriter(console, &arena, 1024);
 
-    PxLogger logger = pxLoggerMake(&arena, writer,
-        PX_REPORT_LEVEL_WARN, PX_REPORT_FLAG_COLORS);
+    PxLogger logger = pxLoggerReserve(&arena, 1024, &writer);
 
-    pxLoggerInteger64(&logger, 0, 356);
-    pxLoggerString16(&logger, 1, pxs16(L"ciao"));
+    pxLoggerSetFlags(&logger, PX_REPORT_FLAG_LEVEL | PX_REPORT_FLAG_COLOR);
+    pxLoggerSetLevel(&logger, PX_REPORT_LEVEL_WARN);
 
-    pxLoggerReport(&logger, pxs8("WARN\n\n"));
+    pxLoggerWrite(&logger, "Level is \"warn\"\n\n", (PxFormatCmd) {0});
 
-    pxLoggerWarn(&logger,
-        pxs8("code = ${0}, text = ${1}, number = ${0}\n"));
+    pxLoggerError(&logger, "IMPORTANT\n", (PxFormatCmd) {0});
 
-    pxLoggerMsg(&logger, pxs8("prova\n"));
+    pxLoggerInfo(&logger, "With args [${0}, ${1}, ${2}, ${3}, ${4}, ${5}]\n",
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 1),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 2),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 3),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 4),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 5),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 6),
+    );
 
-    pxLoggerInfo(&logger,
-        pxs8("code = ${0}, text = ${1}, number = ${2}\n"));
+    pxLoggerWarn(&logger, "No args\n", (PxFormatCmd) {0});
+    pxLoggerTrace(&logger, "No args\n", (PxFormatCmd) {0});
 
     pxLoggerSetLevel(&logger, PX_REPORT_LEVEL_TRACE);
 
-    pxLoggerReport(&logger, pxs8("\nTRACE\n\n"));
+    pxLoggerWrite(&logger, "\nlevel is \"trace\"\n\n", (PxFormatCmd) {0});
 
-    pxLoggerWarn(&logger,
-        pxs8("code = ${0}, text = ${1}, number = ${0}\n"));
+    pxLoggerError(&logger, "IMPORTANT\n", (PxFormatCmd) {0});
 
-    pxLoggerMsg(&logger, pxs8("prova\n"));
+    pxLoggerInfo(&logger, "With args [${0}, ${1}, ${2}, ${3}, ${4}, ${5}]\n",
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 1),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 2),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 3),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 4),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 5),
+        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 6),
+    );
 
-    pxLoggerInfo(&logger,
-        pxs8("code = ${0}, text = ${1}, number = ${2}\n"));
+    pxLoggerWarn(&logger, "No args\n", (PxFormatCmd) {0});
+    pxLoggerTrace(&logger, "No args\n", (PxFormatCmd) {0});
 }

@@ -3,8 +3,7 @@
 
 #include "utf8.h"
 
-#define pxs8(x) \
-    ((PxString8) {.memory = pxCast(pxu8*, x), .length = pxSize(x) - 1})
+#define pxs8(x) (PxString8) {.memory = pxCast(pxu8*, x), .length = pxSizeArray(pxu8, x) - 1}
 
 typedef struct PxString8
 {
@@ -12,6 +11,9 @@ typedef struct PxString8
     pxiword length;
 }
 PxString8;
+
+PxString8
+pxString8Make(pxu8* memory, pxiword length);
 
 PxString8
 pxString8FromMemory(void* memory, pxiword length);
@@ -69,6 +71,12 @@ pxString8Slice(PxString8 self, pxiword start, pxiword stop);
 
 PxString8
 pxString8SliceLength(PxString8 self, pxiword index, pxiword length);
+
+PxString8
+pxString8SliceHead(PxString8 self, pxiword head);
+
+PxString8
+pxString8SliceTail(PxString8 self, pxiword tail);
 
 PxString8
 pxString8TrimSpaces(PxString8 self);

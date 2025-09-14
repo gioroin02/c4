@@ -4,22 +4,29 @@
 #include "string16.h"
 
 PxString16
+pxString16Make(pxu16* memory, pxiword length)
+{
+    PxString16 result = {0};
+
+    if (memory != 0 && length > 0) {
+        result.memory = memory;
+        result.length = length;
+    }
+
+    return result;
+}
+
+PxString16
 pxString16FromMemory(void* memory, pxiword length)
 {
     for (pxiword i = 0; i < length; i += 1) {
         if (pxCast(pxu16*, memory)[i] != 0)
             continue;
 
-        return (PxString16) {
-            .memory = memory,
-            .length = i,
-        };
+        return pxString16Make(memory, i);
     }
 
-    return (PxString16) {
-        .memory = memory,
-        .length = length,
-    };
+    return pxString16Make(memory, length);
 }
 
 PxString16
@@ -33,10 +40,7 @@ pxString16CopyUnicode(PxArena* arena, pxi32 value)
 
     pxUtf16WriteMemory16Forw(result, length, 0, value);
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 PxString16
@@ -55,10 +59,7 @@ pxString16CopyMemory16(PxArena* arena, pxu16* memory, pxiword length)
 
     pxMemoryCopy(result, memory, length, 2);
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 PxString16
@@ -78,10 +79,7 @@ pxString16ChainMemory16(PxString16 self, PxArena* arena, pxu16* memory, pxiword 
     pxMemoryCopy(result, self.memory, self.length, 2);
     pxMemoryCopy(result + self.length, memory, length, 2);
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 PxString16
@@ -115,10 +113,7 @@ pxString16Replace(PxString16 self, PxArena* arena, PxString16 value, PxString16 
     for (pxiword j = start; j < self.length; j += 1)
         result[j] = self.memory[j];
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 pxb8
@@ -226,10 +221,19 @@ pxString16SliceLength(PxString16 self, pxiword index, pxiword length)
 
     pxu16* memory = self.memory + index;
 
-    return (PxString16) {
-        .memory = memory,
-        .length = length,
-    };
+    return pxString16Make(memory, length);
+}
+
+PxString16
+pxString16SliceHead(PxString16 self, pxiword head)
+{
+    return pxString16Slice(self, head, self.length);
+}
+
+PxString16
+pxString16SliceTail(PxString16 self, pxiword tail)
+{
+    return pxString16Slice(self, 0, tail);
 }
 
 PxString16

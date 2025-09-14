@@ -29,8 +29,8 @@ PxJsonTokenType;
 
 typedef struct PxJsonTokenError
 {
-    PxString8 message;
     PxString8 subject;
+    PxString8 content;
 }
 PxJsonTokenError;
 
@@ -43,11 +43,11 @@ typedef struct PxJsonToken
     {
         PxJsonTokenError error;
 
-        PxString8 value_string;
-        pxuword   value_unsigned;
-        pxiword   value_integer;
-        pxfword   value_floating;
-        pxbword   value_boolean;
+        PxString8 string_8;
+        pxuword   unsigned_word;
+        pxiword   integer_word;
+        pxfword   floating_word;
+        pxbword   boolean_word;
     };
 }
 PxJsonToken;
@@ -56,7 +56,7 @@ PxJsonToken
 pxJsonTokenNone();
 
 PxJsonToken
-pxJsonTokenError(PxString8 subject, PxString8 message);
+pxJsonTokenError(PxString8 subject, PxString8 content);
 
 PxJsonToken
 pxJsonTokenObjectOpen();

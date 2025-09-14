@@ -52,11 +52,11 @@ showJsonToken(PxReader* reader, PxArena* arena)
 
         switch (token.type) {
             case PX_JSON_TOKEN_ERROR: {
-                PxString8 message = token.error.message;
+                PxString8 content = token.error.content;
                 PxString8 subject = token.error.subject;
 
                 printf(RED("%.*s: %.*s"),
-                    pxCast(int, message.length), message.memory,
+                    pxCast(int, content.length), content.memory,
                     pxCast(int, subject.length), subject.memory);
 
                 token.type = PX_JSON_TOKEN_COUNT;
@@ -88,23 +88,23 @@ showJsonToken(PxReader* reader, PxArena* arena)
 
             case PX_JSON_TOKEN_STRING:
                 printf(BLUE("'%.*s'"),
-                    pxCast(int, token.value_string.length), token.value_string.memory);
+                    pxCast(int, token.string_8.length), token.string_8.memory);
             break;
 
             case PX_JSON_TOKEN_UNSIGNED:
-                printf(PURPLE("%llu"), token.value_unsigned);
+                printf(PURPLE("%llu"), token.unsigned_word);
             break;
 
             case PX_JSON_TOKEN_INTEGER:
-                printf(PURPLE("%lli"), token.value_integer);
+                printf(PURPLE("%lli"), token.integer_word);
             break;
 
             case PX_JSON_TOKEN_FLOATING:
-                printf(PURPLE("%lf"), token.value_floating);
+                printf(PURPLE("%lf"), token.floating_word);
             break;
 
             case PX_JSON_TOKEN_BOOLEAN:
-                printf("%s", token.value_boolean != 0 ? GREEN("true") : RED("false"));
+                printf("%s", token.boolean_word != 0 ? GREEN("true") : RED("false"));
             break;
 
             case PX_JSON_TOKEN_NULL:

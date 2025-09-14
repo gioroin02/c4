@@ -15,11 +15,23 @@ PxByteOrder;
 PxByteOrder
 pxByteOrder();
 
+/* Memory network from host */
+
 void*
 pxMemoryNetFromHost(void* memory, pxiword amount, pxiword stride);
 
 void*
 pxMemoryCopyNetFromHost(void* memory, void* value, pxiword amount, pxiword stride);
+
+/* Memory host from network */
+
+void*
+pxMemoryHostFromNet(void* memory, pxiword amount, pxiword stride);
+
+void*
+pxMemoryCopyHostFromNet(void* memory, void* value, pxiword amount, pxiword stride);
+
+/* Numbers network from host */
 
 pxu16
 pxUnsigned16NetFromHost(pxu16 value);
@@ -54,11 +66,7 @@ pxFloating64NetFromHost(pxf64 value);
 pxuword
 pxFloatingNetFromHost(pxfword value);
 
-void*
-pxMemoryHostFromNet(void* memory, pxiword amount, pxiword stride);
-
-void*
-pxMemoryCopyHostFromNet(void* memory, void* value, pxiword amount, pxiword stride);
+/* Number host from network */
 
 pxu16
 pxUnsigned16HostFromNet(pxu16 value);

@@ -6,6 +6,7 @@
 
 #include "message.c"
 
-#include "renderer.c"
+#include "color.c"
+#include "frame.c"
 
 #endif // C4_GAME_EXPORT_C

@@ -12,14 +12,15 @@ pxJsonTokenNone()
 }
 
 PxJsonToken
-pxJsonTokenError(PxString8 subject, PxString8 message)
+pxJsonTokenError(PxString8 subject, PxString8 content)
 {
     return (PxJsonToken) {
         .type   = PX_JSON_TOKEN_ERROR,
         .length = subject.length,
+
         .error = {
-            .message = message,
             .subject = subject,
+            .content = content,
         },
     };
 }
@@ -82,9 +83,9 @@ PxJsonToken
 pxJsonTokenString(PxString8 string)
 {
     return (PxJsonToken) {
-        .type         = PX_JSON_TOKEN_STRING,
-        .length       = string.length + 2,
-        .value_string = string,
+        .type     = PX_JSON_TOKEN_STRING,
+        .length   = string.length + 2,
+        .string_8 = string,
     };
 }
 
@@ -100,9 +101,9 @@ pxJsonTokenUnsigned(PxString8 string)
         return pxJsonTokenError(string, pxs8("Invalid number"));
 
     return (PxJsonToken) {
-        .type           = PX_JSON_TOKEN_UNSIGNED,
-        .length         = string.length,
-        .value_unsigned = value,
+        .type          = PX_JSON_TOKEN_UNSIGNED,
+        .length        = string.length,
+        .unsigned_word = value,
     };
 }
 
@@ -118,9 +119,9 @@ pxJsonTokenInteger(PxString8 string)
         return pxJsonTokenError(string, pxs8("Invalid number"));
 
     return (PxJsonToken) {
-        .type          = PX_JSON_TOKEN_INTEGER,
-        .length        = string.length,
-        .value_integer = value,
+        .type         = PX_JSON_TOKEN_INTEGER,
+        .length       = string.length,
+        .integer_word = value,
     };
 }
 
@@ -136,9 +137,9 @@ pxJsonTokenFloating(PxString8 string)
         return pxJsonTokenError(string, pxs8("Not implemented yet"));
 
     return (PxJsonToken) {
-        .type           = PX_JSON_TOKEN_FLOATING,
-        .length         = string.length,
-        .value_floating = value,
+        .type          = PX_JSON_TOKEN_FLOATING,
+        .length        = string.length,
+        .floating_word = value,
     };
 }
 
@@ -146,9 +147,9 @@ PxJsonToken
 pxJsonTokenBoolean(PxString8 string, pxbword value)
 {
     return (PxJsonToken) {
-        .type          = PX_JSON_TOKEN_BOOLEAN,
-        .length        = string.length,
-        .value_boolean = value,
+        .type         = PX_JSON_TOKEN_BOOLEAN,
+        .length       = string.length,
+        .boolean_word = value,
     };
 }
 

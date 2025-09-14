@@ -24,7 +24,7 @@ pxAddressIp6FromString8(PxAddressIp6* self, PxString8 string)
             for (pxiword i = 0; i < PX_ADDRESS_IP6_GROUPS; i += 1) {
                 pxString8Split(string, pxs8(":"), &group, &string);
 
-                if (pxUnsigned16FromString8(&temp.memory[i], 16, options, group) == 0)
+                if (pxUnsigned16FromString8(&temp.items[i], 16, options, group) == 0)
                     return 0;
             }
         } break;
@@ -43,7 +43,7 @@ pxAddressIp6FromString8(PxAddressIp6* self, PxString8 string)
 
                 if (group.length <= 0) break;
 
-                if (pxUnsigned16FromString8(&temp.memory[i], 16, options, group) == 0)
+                if (pxUnsigned16FromString8(&temp.items[i], 16, options, group) == 0)
                     return 0;
             }
 
@@ -59,7 +59,7 @@ pxAddressIp6FromString8(PxAddressIp6* self, PxString8 string)
 
                 if (group.length <= 0) break;
 
-                if (pxUnsigned16FromString8(&temp.memory[i], 16, options, group) == 0)
+                if (pxUnsigned16FromString8(&temp.items[i], 16, options, group) == 0)
                     return 0;
             }
 
@@ -70,7 +70,7 @@ pxAddressIp6FromString8(PxAddressIp6* self, PxString8 string)
     }
 
     if (self != 0)
-        pxMemoryCopy(self->memory, temp.memory, PX_ADDRESS_IP6_GROUPS, 2);
+        pxMemoryCopy(self->items, temp.items, PX_ADDRESS_IP6_GROUPS, 2);
 
     return 1;
 }
@@ -78,7 +78,7 @@ pxAddressIp6FromString8(PxAddressIp6* self, PxString8 string)
 pxb8
 pxAddressIp6IsEqual(PxAddressIp6 self, PxAddressIp6 value)
 {
-    return pxMemoryIsEqual(self.memory, value.memory,
+    return pxMemoryIsEqual(self.items, value.items,
         PX_ADDRESS_IP6_GROUPS, 2);
 }
 

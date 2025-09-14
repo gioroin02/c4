@@ -17,7 +17,7 @@ main(int argc, char** argv)
         break;
 
         default:
-            printf("Error\n");
+            printf("Unknown\n");
         break;
     }
 }

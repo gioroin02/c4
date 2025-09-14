@@ -7,34 +7,35 @@ main(int argc, char** argv)
 {
     PxArena arena = pxMemoryReserve(16);
 
-    PxConsole console = pxConsoleCreate(&arena, PX_MEMORY_KIB);
+    PxConsole console = pxConsoleCreate(&arena);
+    PxReader  reader  = pxConsoleReader(console, &arena, PX_MEMORY_KIB);
 
-    pxConsoleSetMode(console, PX_CONSOLE_MODE_EVENT);
+    pxConsoleSetMode(console, PX_CONSOLE_MODE_MESSAGE);
 
     pxb8 active = 1;
 
     while (active != 0) {
-        PxConsoleEvent event = pxConsoleReadEvent(console);
+        PxConsoleMsg message = pxConsoleReadMessage(&reader);
 
-        switch (event.type) {
-            case PX_CONSOLE_EVENT_NONE: printf("none\r\n"); break;
+        switch (message.type) {
+            case PX_CONSOLE_MSG_NONE: printf("none\r\n"); break;
 
-            case PX_CONSOLE_EVENT_KEYBD_PRESS: {
+            case PX_CONSOLE_MSG_KEYBD_PRESS: {
                 printf("keybd_press   { btn = %lli, mod = %llu, uni = %li }\r\n",
-                    event.keybd_press.button,
-                    event.keybd_press.modifs,
-                    event.keybd_press.unicode
+                    message.keybd_press.button,
+                    message.keybd_press.modifs,
+                    message.keybd_press.unicode
                 );
 
-                if (event.keybd_press.button == PX_CONSOLE_KEYBD_ESCAPE)
+                if (message.keybd_press.button == PX_CONSOLE_KEYBD_ESCAPE)
                     active = 0;
             } break;
 
-            case PX_CONSOLE_EVENT_KEYBD_RELEASE: {
+            case PX_CONSOLE_MSG_KEYBD_RELEASE: {
                 printf("keybd_release { btn = %lli, mod = %llu, uni = %li }\r\n",
-                    event.keybd_release.button,
-                    event.keybd_release.modifs,
-                    event.keybd_release.unicode
+                    message.keybd_release.button,
+                    message.keybd_release.modifs,
+                    message.keybd_release.unicode
                 );
             } break;
 

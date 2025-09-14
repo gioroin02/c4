@@ -31,7 +31,7 @@
 
 #ifndef PX_SYSTEM
 
-    #if defined(_WIN32)
+    #if defined(_WIN32) || defined(_WIN64)
 
         #define PX_SYSTEM PX_SYSTEM_WINDOWS
 

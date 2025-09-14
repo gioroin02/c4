@@ -12,8 +12,6 @@
     #define __pxConsoleModeEvent__   pxWindowsConsoleModeEvent
     #define __pxConsoleWriteMemory__ pxWindowsConsoleWriteMemory
     #define __pxConsoleReadMemory__  pxWindowsConsoleReadMemory
-    #define __pxConsoleReadEvent__   pxWindowsConsoleReadEvent
-    #define __pxConsolePollEvent__   pxWindowsConsolePollEvent
 
 #elif PX_SYSTEM == PX_SYSTEM_LINUX
 
@@ -24,8 +22,6 @@
     #define __pxConsoleModeEvent__   pxLinuxConsoleModeEvent
     #define __pxConsoleWriteMemory__ pxLinuxConsoleWriteMemory
     #define __pxConsoleReadMemory__  pxLinuxConsoleReadMemory
-    #define __pxConsoleReadEvent__   pxLinuxConsoleReadEvent
-    #define __pxConsolePollEvent__   pxLinuxConsolePollEvent
 
 #else
 
@@ -34,9 +30,9 @@
 #endif
 
 PxConsole
-pxConsoleCreate(PxArena* arena, pxiword length)
+pxConsoleCreate(PxArena* arena)
 {
-    return __pxConsoleCreate__(arena, length);
+    return __pxConsoleCreate__(arena);
 }
 
 pxb8
@@ -46,7 +42,7 @@ pxConsoleSetMode(PxConsole self, PxConsoleMode mode)
         case PX_CONSOLE_MODE_DEFAULT:
             return __pxConsoleModeDefault__(self);
 
-        case PX_CONSOLE_MODE_EVENT:
+        case PX_CONSOLE_MODE_MESSAGE:
             return __pxConsoleModeEvent__(self);
 
         default: break;
@@ -101,18 +97,6 @@ pxiword
 pxConsoleReadMemory(PxConsole self, void* memory, pxiword amount, pxiword stride)
 {
     return __pxConsoleReadMemory__(self, memory, amount, stride);
-}
-
-PxConsoleEvent
-pxConsoleReadEvent(PxConsole self)
-{
-    return __pxConsoleReadEvent__(self);
-}
-
-PxConsoleEvent
-pxConsolePollEvent(PxConsole self)
-{
-    return __pxConsolePollEvent__(self);
 }
 
 PxWriter

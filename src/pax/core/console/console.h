@@ -1,7 +1,8 @@
 #ifndef PX_CORE_CONSOLE_CONSOLE_H
 #define PX_CORE_CONSOLE_CONSOLE_H
 
-#include "event.h"
+#include "command.h"
+#include "message.h"
 
 typedef void* PxConsole;
 
@@ -9,12 +10,12 @@ typedef enum PxConsoleMode
 {
     PX_CONSOLE_MODE_NONE,
     PX_CONSOLE_MODE_DEFAULT,
-    PX_CONSOLE_MODE_EVENT,
+    PX_CONSOLE_MODE_MESSAGE,
 }
 PxConsoleMode;
 
 PxConsole
-pxConsoleCreate(PxArena* arena, pxiword length);
+pxConsoleCreate(PxArena* arena);
 
 pxb8
 pxConsoleSetMode(PxConsole self, PxConsoleMode mode);
@@ -30,12 +31,6 @@ pxConsoleRead(PxConsole self, PxBuffer8* buffer);
 
 pxiword
 pxConsoleReadMemory(PxConsole self, void* memory, pxiword amount, pxiword stride);
-
-PxConsoleEvent
-pxConsoleReadEvent(PxConsole self);
-
-PxConsoleEvent
-pxConsolePollEvent(PxConsole self);
 
 PxWriter
 pxConsoleWriter(PxConsole self, PxArena* arena, pxiword length);

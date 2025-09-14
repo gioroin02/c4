@@ -9,4 +9,6 @@
 #include "string16.c"
 #include "string32.c"
 
+#include "builder.c"
+
 #endif // PX_CORE_FORMAT_EXPORT_C

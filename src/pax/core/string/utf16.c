@@ -8,7 +8,7 @@ pxUtf16Encode(PxUtf16* self, pxi32 value)
 {
     pxiword units = pxUtf16UnitsToWrite(value);
 
-    pxMemoryZero(self->memory, PX_UTF16_MAX_UNITS, 2);
+    pxMemoryZero(self->items, PX_UTF16_UNITS, 2);
 
     self->size = 0;
 
@@ -39,7 +39,7 @@ pxUtf16WriteMemory16Forw(pxu16* memory, pxiword length, pxiword index, pxi32 val
         return 0;
 
     for (pxiword i = 0; i < utf16.size; i += 1)
-        memory[index + i] = utf16.memory[i];
+        memory[index + i] = utf16.items[i];
 
     return utf16.size;
 }
@@ -55,7 +55,7 @@ pxUtf16WriteMemory16Back(pxu16* memory, pxiword length, pxiword index, pxi32 val
         return 0;
 
     for (pxiword i = 0; i < utf16.size; i += 1)
-        memory[index - utf16.size + i] = utf16.memory[i];
+        memory[index - utf16.size + i] = utf16.items[i];
 
     return utf16.size;
 }
@@ -63,7 +63,7 @@ pxUtf16WriteMemory16Back(pxu16* memory, pxiword length, pxiword index, pxi32 val
 pxb8
 pxUtf16Decode(PxUtf16* self, pxi32* value)
 {
-    pxiword units = pxUtf16UnitsToRead(self->memory[0]);
+    pxiword units = pxUtf16UnitsToRead(self->items[0]);
     pxi32   temp  = 0;
 
     if (self->size != units) return 0;
@@ -102,7 +102,7 @@ pxUtf16ReadMemory16Forw(pxu16* memory, pxiword length, pxiword index, pxi32* val
         return 0;
 
     for (pxiword i = 0; i < utf16.size; i += 1)
-        utf16.memory[i] = memory[index + i];
+        utf16.items[i] = memory[index + i];
 
     if (pxUtf16Decode(&utf16, value) == 0) return 0;
 
@@ -130,7 +130,7 @@ pxUtf16ReadMemory16Back(pxu16* memory, pxiword length, pxiword index, pxi32* val
         return 0;
 
     for (pxiword i = 0; i < utf16.size; i += 1)
-        utf16.memory[i] = memory[index + i];
+        utf16.items[i] = memory[index + i];
 
     if (pxUtf16Decode(&utf16, value) == 0) return 0;
 

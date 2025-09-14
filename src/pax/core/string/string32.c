@@ -4,22 +4,29 @@
 #include "string32.h"
 
 PxString32
+pxString32Make(pxu32* memory, pxiword length)
+{
+    PxString32 result = {0};
+
+    if (memory != 0 && length > 0) {
+        result.memory = memory;
+        result.length = length;
+    }
+
+    return result;
+}
+
+PxString32
 pxString32FromMemory(void* memory, pxiword length)
 {
     for (pxiword i = 0; i < length; i += 1) {
         if (pxCast(pxu32*, memory)[i] != 0)
             continue;
 
-        return (PxString32) {
-            .memory = memory,
-            .length = i,
-        };
+        return pxString32Make(memory, i);
     }
 
-    return (PxString32) {
-        .memory = memory,
-        .length = length,
-    };
+    return pxString32Make(memory, length);
 }
 
 PxString32
@@ -33,10 +40,7 @@ pxString32CopyUnicode(PxArena* arena, pxi32 value)
 
     pxUtf32WriteMemory32Forw(result, length, 0, value);
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 PxString32
@@ -55,10 +59,7 @@ pxString32CopyMemory32(PxArena* arena, pxu32* memory, pxiword length)
 
     pxMemoryCopy(result, memory, length, 4);
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 PxString32
@@ -78,10 +79,7 @@ pxString32ChainMemory32(PxString32 self, PxArena* arena, pxu32* memory, pxiword 
     pxMemoryCopy(result, self.memory, self.length, 4);
     pxMemoryCopy(result + self.length, memory, length, 4);
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 PxString32
@@ -115,10 +113,7 @@ pxString32Replace(PxString32 self, PxArena* arena, PxString32 value, PxString32 
     for (pxiword j = start; j < self.length; j += 1)
         result[j] = self.memory[j];
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 pxb8
@@ -226,10 +221,19 @@ pxString32SliceLength(PxString32 self, pxiword index, pxiword length)
 
     pxu32* memory = self.memory + index;
 
-    return (PxString32) {
-        .memory = memory,
-        .length = length,
-    };
+    return pxString32Make(memory, length);
+}
+
+PxString32
+pxString32SliceHead(PxString32 self, pxiword head)
+{
+    return pxString32Slice(self, head, self.length);
+}
+
+PxString32
+pxString32SliceTail(PxString32 self, pxiword tail)
+{
+    return pxString32Slice(self, 0, tail);
 }
 
 PxString32

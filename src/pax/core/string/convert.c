@@ -70,10 +70,7 @@ pxString8CopyString16(PxArena* arena, PxString16 value)
             result, length ,index, unicode);
     }
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 PxString8
@@ -99,10 +96,7 @@ pxString8CopyString32(PxArena* arena, PxString32 value)
             result, length ,index, unicode);
     }
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 pxiword
@@ -172,10 +166,7 @@ pxString16CopyString8(PxArena* arena, PxString8 value)
             result, length ,index, unicode);
     }
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 PxString16
@@ -201,10 +192,7 @@ pxString16CopyString32(PxArena* arena, PxString32 value)
             result, length ,index, unicode);
     }
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 pxiword
@@ -274,10 +262,7 @@ pxString32CopyString8(PxArena* arena, PxString8 value)
             result, length ,index, unicode);
     }
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 PxString32
@@ -303,10 +288,7 @@ pxString32CopyString16(PxArena* arena, PxString16 value)
             result, length ,index, unicode);
     }
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 #endif // PX_CORE_STRING_CONVERT_C

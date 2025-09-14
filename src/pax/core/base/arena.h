@@ -3,8 +3,8 @@
 
 #include "memory.h"
 
-#define pxArenaReserve(arena, type, amount) \
-    pxCast(type*, pxArenaReserveMemory(arena, amount, pxSize(type)))
+#define pxArenaReserve(self, t, amount) \
+    pxCast(t*, pxArenaReserveMemory(self, amount, pxSize(t)))
 
 typedef struct PxArena
 {

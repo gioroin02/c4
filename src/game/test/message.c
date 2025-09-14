@@ -11,7 +11,7 @@
 
 #define MESSAGE \
     pxs8("{ \"player_accept\": { \"player_number\": 4, \"player_code\": 156, \"board_width\": 5, " \
-        "\"board_height\": 5, \"piece_color\": 2, \"piece_shape\": \"ciao\" } }")
+        "\"board_height\": 5, \"player_color\": {\"color_rgb\": {\"r\": 126, \"g\": 2, \"b\":0}}, \"player_text\": \"ciao\" } }")
 
 int
 main(int argc, char** argv)
@@ -20,32 +20,33 @@ main(int argc, char** argv)
     PxBuffer8 source = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
     PxBuffer8 target = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
 
-    PxConsole console = pxConsoleCreate(&arena, 256);
-    PxWriter  output = pxConsoleWriter(console, &arena, PX_MEMORY_KIB);
+    PxReader buff_reader = pxBufferReader(&source, &arena, PX_MEMORY_KIB);
+    PxWriter buff_writer = pxBufferWriter(&target, &arena, PX_MEMORY_KIB);
 
-    PxLogger logger = pxLoggerMake(&arena, output,
-        PX_REPORT_LEVEL_TRACE, PX_REPORT_FLAG_COLORS);
+    PxConsole console = pxConsoleCreate(&arena);
+    PxWriter  writer  = pxConsoleWriter(console, &arena, PX_MEMORY_KIB);
+
+    PxLogger logger = pxLoggerReserve(&arena, PX_MEMORY_KIB, &writer);
+
+    pxLoggerSetFlags(&logger, PX_REPORT_FLAG_COLOR | PX_REPORT_FLAG_LEVEL);
+    pxLoggerSetLevel(&logger, PX_REPORT_LEVEL_TRACE);
 
     pxBuffer8WriteString8Tail(&source, MESSAGE);
 
-    PxJsonReader reader = pxJsonReaderMake(&arena, 8,
-        pxBufferReader(&source, &arena, PX_MEMORY_KIB));
-
-    PxJsonWriter writer = pxJsonWriterMake(&arena, 8,
-        pxBufferWriter(&target, &arena, PX_MEMORY_KIB));
+    PxJsonReader json_reader = pxJsonReaderMake(&arena, 8, &buff_reader);
+    PxJsonWriter json_writer = pxJsonWriterMake(&arena, 8, &buff_writer);
 
     C4Msg message = (C4Msg) {0};
 
-    c4JsonReadMsg(&message, &reader, &arena);
-    c4LogMsg(&message, &logger);
+    c4JsonReadMsg(&message, &json_reader, &arena);
 
-    c4JsonWriteMsg(&message, &writer, &arena);
+    pxLoggerTrace(&logger, "${0}",
+        pxFormatCmdDelegate(&message, &c4FormatProcMsg));
+
+    c4JsonWriteMsg(&message, &json_writer, &arena);
 
     printf("\n");
 
-    pxLoggerString8(&logger, 0, (PxString8) {
-        .memory = target.memory, .length = target.size,
-    });
-
-    pxLoggerReport(&logger, pxs8("${0}"));
+    pxLoggerWrite(&logger, "${0}\n",
+        pxFormatCmdString8(pxString8Make(target.memory, target.size)));
 }

@@ -11,6 +11,9 @@ typedef struct PxString32
 PxString32;
 
 PxString32
+pxString32Make(pxu32* memory, pxiword length);
+
+PxString32
 pxString32FromMemory(void* memory, pxiword length);
 
 PxString32
@@ -66,6 +69,12 @@ pxString32Slice(PxString32 self, pxiword start, pxiword stop);
 
 PxString32
 pxString32SliceLength(PxString32 self, pxiword index, pxiword length);
+
+PxString32
+pxString32SliceHead(PxString32 self, pxiword head);
+
+PxString32
+pxString32SliceTail(PxString32 self, pxiword tail);
 
 PxString32
 pxString32TrimSpaces(PxString32 self);

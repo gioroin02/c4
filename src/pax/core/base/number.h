@@ -194,6 +194,23 @@ pxMagnitudeFloating64(pxf64 value);
 pxfword
 pxMagnitudeFloating(pxfword value);
 
+/* Unsigned direction */
+
+pxi8
+pxDirectionUnsigned8(pxu8 value);
+
+pxi8
+pxDirectionUnsigned16(pxu16 value);
+
+pxi8
+pxDirectionUnsigned32(pxu32 value);
+
+pxi8
+pxDirectionUnsigned64(pxu64 value);
+
+pxi8
+pxDirectionUnsigned(pxuword value);
+
 /* Integer direction */
 
 pxi8

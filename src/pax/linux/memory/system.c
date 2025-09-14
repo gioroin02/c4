@@ -3,6 +3,8 @@
 
 #include "system.h"
 
+#define _DEFAULT_SOURCE
+
 #include <unistd.h>
 #include <errno.h>
 

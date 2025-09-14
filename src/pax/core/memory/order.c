@@ -39,6 +39,24 @@ pxMemoryCopyNetFromHost(void* memory, void* value, pxiword amount, pxiword strid
     return pxMemoryCopy(memory, value, amount * stride, 1);
 }
 
+void*
+pxMemoryHostFromNet(void* memory, pxiword amount, pxiword stride)
+{
+    if (pxByteOrder() == PX_BYTE_ORDER_REVERSE)
+        return pxMemoryFlip(memory, amount * stride, 1);
+
+    return memory;
+}
+
+void*
+pxMemoryCopyHostFromNet(void* memory, void* value, pxiword amount, pxiword stride)
+{
+    if (pxByteOrder() == PX_BYTE_ORDER_REVERSE)
+        return pxMemoryCopyFlipped(memory, value, amount * stride, 1);
+
+    return pxMemoryCopy(memory, value, amount * stride, 1);
+}
+
 pxu16
 pxUnsigned16NetFromHost(pxu16 value)
 {
@@ -158,24 +176,6 @@ pxFloatingNetFromHost(pxfword value)
         &value, 1, PX_FWORD_SIZE);
 
     return result;
-}
-
-void*
-pxMemoryHostFromNet(void* memory, pxiword amount, pxiword stride)
-{
-    if (pxByteOrder() == PX_BYTE_ORDER_REVERSE)
-        return pxMemoryFlip(memory, amount * stride, 1);
-
-    return memory;
-}
-
-void*
-pxMemoryCopyHostFromNet(void* memory, void* value, pxiword amount, pxiword stride)
-{
-    if (pxByteOrder() == PX_BYTE_ORDER_REVERSE)
-        return pxMemoryCopyFlipped(memory, value, amount * stride, 1);
-
-    return pxMemoryCopy(memory, value, amount * stride, 1);
 }
 
 pxu16

@@ -6,6 +6,7 @@
 
 #include "message.h"
 
-#include "renderer.h"
+#include "color.h"
+#include "frame.h"
 
 #endif // C4_GAME_EXPORT_H

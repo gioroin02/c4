@@ -306,10 +306,7 @@ pxString8FromStringList(PxArena* arena, PxStringList* value, PxString8 pivot, Px
 
     index += suffix.length;
 
-    return (PxString8) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString8Make(result, length);
 }
 
 PxString16
@@ -363,10 +360,7 @@ pxString16FromStringList(PxArena* arena, PxStringList* value, PxString16 pivot, 
 
     index += suffix.length;
 
-    return (PxString16) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString16Make(result, length);
 }
 
 PxString32
@@ -420,10 +414,7 @@ pxString32FromStringList(PxArena* arena, PxStringList* value, PxString32 pivot, 
 
     index += suffix.length;
 
-    return (PxString32) {
-        .memory = result,
-        .length = length,
-    };
+    return pxString32Make(result, length);
 }
 
 #endif // PX_CORE_STRING_LIST_C

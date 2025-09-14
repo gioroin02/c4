@@ -3,18 +3,18 @@
 
 #include "unicode.h"
 
-#define PX_UTF16_MIN_UNITS pxCast(pxiword, 1)
-#define PX_UTF16_MAX_UNITS pxCast(pxiword, 2)
+#define PX_UTF16_UNITS pxCast(pxiword, 2)
 
 typedef struct PxUtf16
 {
     union
     {
-        struct {
+        struct
+        {
             pxu16 a, b;
         };
 
-        pxu16 memory[PX_UTF16_MAX_UNITS];
+        pxu16 items[PX_UTF16_UNITS];
     };
 
     pxiword size;

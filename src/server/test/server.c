@@ -1,40 +1,5 @@
 #include "../export.h"
 
-#include <stdio.h>
-
-#define COLOR_RESET "\x1b[0m"
-
-#define FRONT_RED    "\x1b[31m"
-#define FRONT_GREEN  "\x1b[32m"
-#define FRONT_YELLOW "\x1b[33m"
-#define FRONT_BLUE   "\x1b[34m"
-#define FRONT_PURPLE "\x1b[35m"
-#define FRONT_AZURE  "\x1b[36m"
-
-#define RED(expr)    FRONT_RED    expr COLOR_RESET
-#define GREEN(expr)  FRONT_GREEN  expr COLOR_RESET
-#define YELLOW(expr) FRONT_YELLOW expr COLOR_RESET
-#define BLUE(expr)   FRONT_BLUE   expr COLOR_RESET
-#define PURPLE(expr) FRONT_PURPLE expr COLOR_RESET
-#define AZURE(expr)  FRONT_AZURE  expr COLOR_RESET
-
-#define FATAL PURPLE("FATAL")
-#define ERROR RED("ERROR")
-#define WARN  YELLOW("WARN")
-#define INFO  BLUE("INFO")
-#define DEBUG GREEN("DEBUG")
-#define TRACE AZURE("TRACE")
-
-static const char* const FRONTS[] = {
-    COLOR_RESET,
-    FRONT_RED,
-    FRONT_GREEN,
-    FRONT_YELLOW,
-    FRONT_BLUE,
-    FRONT_PURPLE,
-    FRONT_AZURE,
-};
-
 typedef struct C4ServerConfig
 {
     PxAddressType type;
@@ -78,58 +43,16 @@ c4GamePlayerHasWon(C4GameState* self, pxiword x, pxiword y, pxiword length)
     return 0;
 }
 
-void
-c4GameBoardLog(C4GameState* game)
-{
-    printf("#");
-
-    for (pxiword i = 0; i < game->board.width; i += 1)
-        printf("---#");
-
-    printf("\n");
-
-    for (pxiword r = game->board.height; r > 0; r -= 1) {
-        printf("| ");
-
-        for (pxiword c = 0; c < game->board.width; c += 1) {
-            pxuword item = c4GameBoardReadOr(&game->board, c, r - 1, 0);
-
-            C4GamePlayer player = {0};
-
-            if (item > 0) {
-                pxiword index = 0;
-
-                if (c4GamePlayerListFind(&game->players, item, &index))
-                    c4GamePlayerListRead(&game->players, index, &player);
-            }
-
-            if (player.code != 0)
-                printf("%s%c%s | ", FRONTS[player.color], player.shape, FRONTS[0]);
-            else
-                printf("  | ");
-        }
-
-        printf("\n");
-    }
-
-    printf("#");
-
-    for (pxiword i = 0; i < game->board.width; i += 1)
-        printf("---#");
-
-    printf("\n");
-}
-
 C4Msg
-c4GameAccept(PxArena* arena, C4Server* server, C4GameState* game, C4ServerConfig config)
+c4GameAccept(C4GameState* self, PxArena* arena, C4Server* server, C4ServerConfig config)
 {
     pxiword    offset  = pxArenaOffset(arena);
     C4Session* session = c4SessionOpen(server, arena);
 
     if (session == 0) return (C4Msg) {0};
 
-    session->request  = pxBuffer8Reserve(arena, PX_MEMORY_KIB);
-    session->response = pxBuffer8Reserve(arena, PX_MEMORY_KIB);
+    session->reader = pxSocketTcpReader(session->socket, arena, PX_MEMORY_KIB);
+    session->writer = pxSocketTcpWriter(session->socket, arena, PX_MEMORY_KIB);
 
     C4Msg message = c4SessionRead(session, arena);
 
@@ -144,50 +67,45 @@ c4GameAccept(PxArena* arena, C4Server* server, C4GameState* game, C4ServerConfig
 }
 
 pxb8
-c4GameStart(PxArena* arena, C4Server* server, C4GameState *game, C4ServerConfig config)
+c4GameStart(C4GameState *self, PxArena* arena, C4Server* server, C4ServerConfig config)
 {
-    game->players = c4GamePlayerListReserve(arena, config.players);
+    self->players = c4GamePlayerListReserve(arena, config.players);
 
-    if (c4GamePlayerListLength(&game->players) == 0) return 0;
+    if (c4GamePlayerListLength(&self->players) == 0) return 0;
 
-    game->board = c4GameBoardReserve(arena, config.board_width,
-        config.board_height);
+    self->board = c4GameBoardReserve(arena,
+        config.board_width, config.board_height);
 
-    if (c4GameBoardLength(&game->board) == 0) return 0;
+    if (c4GameBoardLength(&self->board) == 0) return 0;
 
-    while (c4GamePlayerListIsFull(&game->players) == 0) {
-        pxiword size = c4GamePlayerListSize(&game->players);
+    while (c4GamePlayerListIsFull(&self->players) == 0) {
+        pxiword size = c4GamePlayerListSize(&self->players);
 
-        C4Msg  message = c4GameAccept(arena, server, game, config);
+        C4Msg      message = c4GameAccept(self, arena, server, config);
         C4Session* session = c4ServerGetOr(server, size, 0);
 
         if (message.type == C4_MESSAGE_NONE || session == 0)
             continue;
 
-        C4GamePlayer player = {
-            .code  = size + 1,
-            .color = size + 1,
-            .shape = size + PX_ASCII_LOWER_A,
-        };
+        PxString8    text   = pxString8CopyUnicode(arena, PX_ASCII_UPPER_A + size);
+        C4GamePlayer player = c4GamePlayer(size + 1, c4Color8(size + 1), text);
 
-        pxb8 state = c4GamePlayerListInsert(&game->players, player);
+        pxb8 state = c4GamePlayerListInsert(&self->players, player);
 
         if (state == 0) return 0;
 
-        message = c4MsgPlayerAccept(config.players,
-            player.code, player.color, player.shape,
+        message = c4MsgPlayerAccept(config.players, player,
             config.board_width, config.board_height);
 
         c4SessionWrite(session, arena, message);
 
-        c4ServerBroadcast(server, arena, session,
-            c4MsgPlayerData(player.code, player.color, player.shape));
+        c4ServerBroadcast(server, arena, session, c4MsgPlayerData(player));
 
         for (pxiword i = 0; i < size; i += 1) {
-            c4GamePlayerListRead(&game->players, i, &player);
+            c4GamePlayerListRead(&self->players, i, &player);
 
             c4SessionWrite(session, arena,
-                c4MsgPlayerData(player.code, player.color, player.shape));
+                c4MsgPlayerData(player));
         }
     }
 
@@ -195,23 +113,21 @@ c4GameStart(PxArena* arena, C4Server* server, C4GameState *game, C4ServerConfig 
 }
 
 pxb8
-c4GameLoop(PxArena* arena, C4Server* server, C4GameState* game)
+c4GameLoop(C4GameState* self, PxArena* arena, C4Server* server)
 {
     pxiword offset = pxArenaOffset(arena);
-    pxiword size   = c4GamePlayerListSize(&game->players);
+    pxiword size   = c4GamePlayerListSize(&self->players);
     pxb8    active = 1;
-
-    c4GameBoardLog(game);
 
     c4ServerBroadcast(server, arena, 0, c4MsgGameStart());
 
     while (active != 0) {
-        C4Session* session = c4ServerGetOr(server, game->turn, 0);
+        C4Session* session = c4ServerGetOr(server, self->turn, 0);
 
         if (session == 0) return 0;
 
         c4ServerBroadcast(server, arena, 0,
-            c4MsgPlayerTurn(game->turn + 1));
+            c4MsgPlayerTurn(self->turn + 1));
 
         C4Msg message = c4SessionRead(session, arena);
 
@@ -220,13 +136,13 @@ c4GameLoop(PxArena* arena, C4Server* server, C4GameState* game)
                 pxiword column = message.player_choice.board_column;
                 pxuword code   = message.player_choice.player_code;
 
-                pxiword height = c4GameBoardHeight(&game->board, column);
+                pxiword height = c4GameBoardHeight(&self->board, column);
 
-                if (c4GameBoardInsert(&game->board, column, code) != 0) {
+                if (c4GameBoardInsert(&self->board, column, code) != 0) {
                     c4ServerBroadcast(server, arena, session, message);
 
-                    if (c4GamePlayerHasWon(game, column, height, 4) == 0) {
-                        if (c4GameBoardIsFull(&game->board))
+                    if (c4GamePlayerHasWon(self, column, height, 4) == 0) {
+                        if (c4GameBoardIsFull(&self->board))
                             message = c4MsgGameStop(0);
                     } else
                         message = c4MsgGameStop(code);
@@ -239,19 +155,17 @@ c4GameLoop(PxArena* arena, C4Server* server, C4GameState* game)
                     }
                 } else {
                     c4ServerBroadcast(server, arena, session,
-                        c4MsgPlayerSkip(game->turn + 1));
+                        c4MsgPlayerSkip(self->turn + 1));
                 }
             } break;
 
             default:
                 c4ServerBroadcast(server, arena, session,
-                    c4MsgPlayerSkip(game->turn + 1));
+                    c4MsgPlayerSkip(self->turn + 1));
             break;
         }
 
-        game->turn = (game->turn + 1) % size;
-
-        c4GameBoardLog(game);
+        self->turn = (self->turn + 1) % size;
 
         pxArenaRewind(arena, offset);
     }
@@ -260,12 +174,14 @@ c4GameLoop(PxArena* arena, C4Server* server, C4GameState* game)
 }
 
 pxb8
-c4GameStop(PxArena* arena, C4Server* server, C4GameState* game)
+c4GameStop(C4GameState* self, PxArena* arena, C4Server* server)
 {
     c4ServerStop(server);
 
     return 1;
 }
+
+PxLogger* LOGGER = 0;
 
 int
 main(int argc, char** argv)
@@ -300,34 +216,45 @@ main(int argc, char** argv)
                 arg = pxString8TrimPrefix(arg, pxs8("--port="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxU16FromString8(&config.port, 10, options, arg);
+                pxUnsigned16FromString8(&config.port, 10, options, arg);
             }
 
             if (pxString8BeginsWith(arg, pxs8("--board-width=")) != 0) {
                 arg = pxString8TrimPrefix(arg, pxs8("--board-width="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxUWordFromString8(&config.board_width, 10, options, arg);
+                pxUnsignedFromString8(&config.board_width, 10, options, arg);
             }
 
             if (pxString8BeginsWith(arg, pxs8("--board-height=")) != 0) {
                 arg = pxString8TrimPrefix(arg, pxs8("--board-height="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxUWordFromString8(&config.board_height, 10, options, arg);
+                pxUnsignedFromString8(&config.board_height, 10, options, arg);
             }
 
             if (pxString8BeginsWith(arg, pxs8("--players=")) != 0) {
                 arg = pxString8TrimPrefix(arg, pxs8("--players="));
                 arg = pxString8TrimSpaces(arg);
 
-                pxUWordFromString8(&config.players, 10, options, arg);
+                pxUnsignedFromString8(&config.players, 10, options, arg);
             }
         }
     }
 
-    C4Server server = c4ServerMake(&arena, config.players,
-        config.type);
+    PxConsole console = pxConsoleCreate(&arena);
+    PxReader  reader  = pxConsoleReader(console, &arena, PX_MEMORY_KIB);
+    PxWriter  writer  = pxConsoleWriter(console, &arena, PX_MEMORY_KIB);
+
+    PxLogger logger = pxLoggerReserve(&arena, 1024, &writer);
+
+    pxLoggerSetFlags(&logger, PX_REPORT_FLAG_LEVEL | PX_REPORT_FLAG_COLOR);
+    pxLoggerSetLevel(&logger, PX_REPORT_LEVEL_INFO);
+
+    LOGGER = &logger;
+
+    C4Server server = c4ServerMake(&arena,
+        config.players, config.type);
 
     pxb8 state = c4ServerStart(&server,
         pxAddressAny(config.type), config.port);
@@ -336,11 +263,11 @@ main(int argc, char** argv)
 
     C4GameState game = {0};
 
-    if (c4GameStart(&arena, &server, &game, config) == 0)
+    if (c4GameStart(&game, &arena, &server, config) == 0)
         return 1;
 
-    c4GameLoop(&arena, &server, &game);
-    c4GameStop(&arena, &server, &game);
+    c4GameLoop(&game, &arena, &server);
+    c4GameStop(&game, &arena, &server);
 
     pxNetworkStop();
 }
