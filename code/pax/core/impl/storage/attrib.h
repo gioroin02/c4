@@ -1,0 +1,30 @@
+#ifndef PAX_CORE_STORAGE_ATTRIB_H
+#define PAX_CORE_STORAGE_ATTRIB_H
+
+#include "./import.h"
+
+typedef enum Pax_File_Mode
+{
+    PAX_FILE_MODE_NONE = 0,
+
+    PAX_FILE_MODE_RD = 1 << 0,
+    PAX_FILE_MODE_WR = 1 << 1,
+    PAX_FILE_MODE_EX = 1 << 2,
+
+    PAX_FILE_MODE_RD_WR = PAX_FILE_MODE_RD | PAX_FILE_MODE_WR,
+    PAX_FILE_MODE_RD_EX = PAX_FILE_MODE_RD | PAX_FILE_MODE_EX,
+    PAX_FILE_MODE_WR_EX = PAX_FILE_MODE_WR | PAX_FILE_MODE_EX,
+
+    PAX_FILE_MODE_FULL =
+        PAX_FILE_MODE_RD | PAX_FILE_MODE_WR | PAX_FILE_MODE_EX,
+}
+Pax_File_Mode;
+
+typedef enum Pax_File_Kind
+{
+    PAX_FILE_NONE      = 0,
+    PAX_FILE_DIRECTORY = 1 << 0,
+}
+Pax_File_Kind;
+
+#endif // PAX_CORE_STORAGE_ATTRIB_H

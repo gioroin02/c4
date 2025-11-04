@@ -6,7 +6,7 @@
 
 !/.gitignore
 
-!/src
-!/cmd
+!/code
+!/test
 
 !/README.md
