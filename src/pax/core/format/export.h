@@ -1,16 +1,15 @@
 #ifndef PX_CORE_FORMAT_EXPORT_H
 #define PX_CORE_FORMAT_EXPORT_H
 
-#include "option.h"
+#include "config.h"
 
-#include "memory8.h"
-#include "memory16.h"
-#include "memory32.h"
+#include "unsigned.h"
+#include "integer.h"
+#include "boolean.h"
 
-#include "string8.h"
-#include "string16.h"
-#include "string32.h"
+#include "message.h"
 
-#include "builder.h"
+#include "printing.h"
+#include "matching.h"
 
 #endif // PX_CORE_FORMAT_EXPORT_H

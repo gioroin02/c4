@@ -3,22 +3,43 @@
 
 #include "message.h"
 
+typedef enum PxJsonWriterFlag
+{
+    PX_JSON_WRITER_NONE  = 0,
+    PX_JSON_WRITER_COMMA = 1 << 0,
+}
+PxJsonWriterFlag;
+
 typedef struct PxJsonWriter
 {
-    PxQueue stack;
-    pxb8    comma;
+    PxTarget target;
+    PxQueue  stack;
 
-    PxWriter* writer;
+    PxJsonWriterFlag flags;
 }
 PxJsonWriter;
 
-PxJsonWriter
-pxJsonWriterMake(PxArena* arena, pxiword length, PxWriter* writer);
+typedef pxb8 (PxJsonWriterProc) (void*, PxJsonWriter*, PxArena*);
 
-pxiword
-pxJsonWriteChain(PxJsonWriter* self, PxArena* arena, pxiword start, pxiword stop, PxJsonMsg* list);
+PxJsonWriter
+pxJsonWriterReserve(PxTarget target, PxArena* arena, pxiword length);
 
 pxb8
-pxJsonWriteMessage(PxJsonWriter* self, PxArena* arena, PxJsonMsg message);
+pxJsonWriterMsg(PxJsonWriter* self, PxArena* arena, PxJsonMsg message);
+
+pxiword
+pxJsonWriterList(PxJsonWriter* self, PxArena* arena, PxJsonMsg* values, pxiword length);
+
+pxb8
+pxJsonWriterObjectOpen(PxJsonWriter* self, PxArena* arena);
+
+pxb8
+pxJsonWriterObjectClose(PxJsonWriter* self, PxArena* arena);
+
+pxb8
+pxJsonWriterArrayOpen(PxJsonWriter* self, PxArena* arena);
+
+pxb8
+pxJsonWriterArrayClose(PxJsonWriter* self, PxArena* arena);
 
 #endif // PX_ENCODING_JSON_WRITER_H

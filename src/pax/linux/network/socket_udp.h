@@ -6,39 +6,39 @@
 typedef struct PxLinuxSocketUdp PxLinuxSocketUdp;
 
 PxLinuxSocketUdp*
-pxLinuxSocketUdpCreate(PxArena* arena, PxAddressType type);
+pxLinuxSocketUdpCreate(PxArena* arena, PxAddrType type);
 
 void
 pxLinuxSocketUdpDestroy(PxLinuxSocketUdp* self);
 
-PxAddress
-pxLinuxSocketUdpGetAddress(PxLinuxSocketUdp* self);
+PxAddr
+pxLinuxSocketUdpGetAddr(PxLinuxSocketUdp* self);
 
 pxu16
 pxLinuxSocketUdpGetPort(PxLinuxSocketUdp* self);
 
 pxb8
-pxLinuxSocketUdpBind(PxLinuxSocketUdp* self, PxAddress address, pxu16 port);
+pxLinuxSocketUdpBind(PxLinuxSocketUdp* self, PxAddr addr, pxu16 port);
 
 pxb8
 pxLinuxSocketUdpListen(PxLinuxSocketUdp* self);
 
 pxb8
-pxLinuxSocketUdpConnect(PxLinuxSocketUdp* self, PxAddress address, pxu16 port);
+pxLinuxSocketUdpConnect(PxLinuxSocketUdp* self, PxAddr addr, pxu16 port);
 
 PxLinuxSocketUdp*
 pxLinuxSocketUdpAccept(PxLinuxSocketUdp* self, PxArena* arena);
 
 pxiword
-pxLinuxSocketUdpWriteMemory(PxLinuxSocketUdp* self, void* memory, pxiword amount, pxiword stride);
+pxLinuxSocketUdpWrite(PxLinuxSocketUdp* self, pxu8* memory, pxiword length);
 
 pxiword
-pxLinuxSocketUdpWriteHostMemory(PxLinuxSocketUdp* self, void* memory, pxiword amount, pxiword stride, PxAddress address, pxu16 port);
+pxLinuxSocketUdpWriteHost(PxLinuxSocketUdp* self, pxu8* memory, pxiword length, PxAddr addr, pxu16 port);
 
 pxiword
-pxLinuxSocketUdpReadMemory(PxLinuxSocketUdp* self, void* memory, pxiword amount, pxiword stride);
+pxLinuxSocketUdpRead(PxLinuxSocketUdp* self, pxu8* memory, pxiword length);
 
 pxiword
-pxLinuxSocketUdpReadHostMemory(PxLinuxSocketUdp* self, void* memory, pxiword amount, pxiword stride, PxAddress* address, pxu16* port);
+pxLinuxSocketUdpReadHost(PxLinuxSocketUdp* self, pxu8* memory, pxiword length, PxAddr* addr, pxu16* port);
 
 #endif // PX_LINUX_NETWORK_SOCKET_UDP_H

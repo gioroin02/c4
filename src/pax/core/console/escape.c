@@ -3,23 +3,26 @@
 
 #include "escape.h"
 
-PxEscapeType
-pxEscapeSetType(PxEscape* self, PxEscapeType value)
+PxConsoleEscGroup
+pxConsoleEscGroupMake(pxuword* values, pxiword length)
 {
-    pxu8 result = self->type;
+    PxConsoleEscGroup result = {0};
 
-    self->type = value;
+    for (pxiword i = 0; i < length; i += 1)
+        pxConsoleEscGroupInsert(&result, values[i]);
 
     return result;
 }
 
 pxb8
-pxEscapeInsertGroupTail(PxEscape* self)
+pxConsoleEscGroupInsert(PxConsoleEscGroup* self, pxuword value)
 {
     pxiword index = self->size;
 
-    if (index < 0 || index >= PX_ESCAPE_GROUPS)
+    if (index < 0 || index >= PX_CONSOLE_ESC_VALUES)
         return 0;
+
+    self->items[index] = value;
 
     self->size += 1;
 
@@ -27,163 +30,122 @@ pxEscapeInsertGroupTail(PxEscape* self)
 }
 
 pxb8
-pxEscapeInsertValueTail(PxEscape* self, pxiword group, pxuword value)
+pxConsoleEscGroupFromString8(PxString8 string, PxConsoleEscGroup* value)
 {
-    if (group < 0 || group >= self->size)
+    PxConsoleEscGroup temp = {0};
+
+    PxFormatRadix radix = PX_FORMAT_RADIX_10;
+    PxFormatFlag  flags = PX_FORMAT_FLAG_NONE;
+
+    PxString8 left  = {0};
+    PxString8 right = string;
+
+    while (right.length > 0) {
+        pxString8Split(right, pxs8(":"), &left, &right);
+
+        pxuword item  = 0;
+        pxb8    state = 0;
+
+        state = pxUnsignedFromString8(left, &item, radix, flags);
+
+        if (left.length >= 0 && state != 0)
+            pxConsoleEscGroupInsert(&temp, item);
+        else
+            return 0;
+    }
+
+    if (value != 0) *value = temp;
+
+    return 1;
+}
+
+PxConsoleEscSeqnc
+pxConsoleEscSeqncMake(PxConsoleEscGroup* values, pxiword length)
+{
+    PxConsoleEscSeqnc result = {0};
+
+    for (pxiword i = 0; i < length; i += 1)
+        pxConsoleEscSeqncInsert(&result, values[i]);
+
+    return result;
+}
+
+pxb8
+pxConsoleEscSeqncInsert(PxConsoleEscSeqnc* self, PxConsoleEscGroup value)
+{
+    pxiword index = self->size;
+
+    if (index < 0 || index >= PX_CONSOLE_ESC_GROUPS)
         return 0;
 
-    PxEscapeGroup* child = &self->groups[group];
-    pxiword        index = child->size;
+    self->items[index] = value;
 
-    if (index < 0 || index >= PX_ESCAPE_VALUES)
-        return 0;
-
-    child->size += 1;
-
-    child->values[index] = value;
+    self->size += 1;
 
     return 1;
 }
 
 pxb8
-pxEscapeReadValue(PxEscape* self, pxiword group, pxiword index, pxuword* value)
+pxConsoleEscSeqncGet(PxConsoleEscSeqnc* self, pxiword group, pxiword index, pxuword* value)
 {
     if (group < 0 || group >= self->size)
         return 0;
 
-    PxEscapeGroup* child = &self->groups[group];
+    PxConsoleEscGroup* item = &self->items[group];
 
-    if (index < 0 || index >= child->size)
+    if (index < 0 || index >= item->size)
         return 0;
 
-    if (value != 0) *value = child->values[index];
+    if (value != 0) *value = item->items[index];
 
     return 1;
 }
 
 pxuword
-pxEscapeReadValueOr(PxEscape* self, pxiword group, pxiword index, pxuword value)
+pxConsoleEscSeqncGetOr(PxConsoleEscSeqnc* self, pxiword group, pxiword index, pxuword value)
 {
     if (group < 0 || group >= self->size)
         return value;
 
-    PxEscapeGroup* child = &self->groups[group];
+    PxConsoleEscGroup* item = &self->items[group];
 
-    if (index < 0 || index >= child->size)
+    if (index < 0 || index >= item->size)
         return value;
 
-    return child->values[index];
+    return item->items[index];
 }
 
 pxb8
-pxEscapeFromString8(PxEscape* self, PxString8 string, pxiword* size)
+pxConsoleEscSeqncFromString8(PxString8 string, PxConsoleEscSeqnc* value)
 {
-    if (string.length <= 2) {
-        if (size != 0)
-            *size = string.length;
+    PxConsoleEscSeqnc temp = {0};
 
-        return 0;
-    }
+    pxiword index = 2;
 
-    if (string.memory[0] != 0x1b) {
-        if (size != 0) *size = 1;
+    if (string.length <= index) return 0;
 
-        return 0;
-    }
-
-    if (string.memory[1] != 0x5b) {
-        if (size != 0) *size = 2;;
-
-        return 0;
-    }
+    if (string.memory[0] != 0x1b) return 0;
+    if (string.memory[1] != 0x5b) return 0;
 
     PxString8 left  = {0};
-    PxString8 right = {0};
-    pxiword   index = 2;
-
-    right = pxString8Slice(string, index, string.length - 1);
+    PxString8 right = pxString8Slice(string, index, string.length - 1);
 
     while (right.length > 0) {
-        index += pxString8Split(right, pxs8(";"), &left, &right);
+        pxString8Split(right, pxs8(";"), &left, &right);
 
-        if (pxEscapeGroupFromString8(self, left) == 0)
-            break;
+        PxConsoleEscGroup group = {0};
+
+        if (pxConsoleEscGroupFromString8(left, &group) == 0)
+            return 0;
+
+        if (pxConsoleEscSeqncInsert(&temp, group) == 0) break;
     }
 
-    switch (string.memory[index]) {
-        case PX_ASCII_LOWER_U:
-            pxEscapeSetType(self, PX_ESCAPE_UNICODE);
-        break;
+    temp.func = string.memory[string.length - 1];
 
-        case PX_ASCII_LOWER_M:
-            pxEscapeSetType(self, PX_ESCAPE_GRAPHIC);
-        break;
-
-        case PX_ASCII_UPPER_A:
-            pxEscapeSetType(self, PX_ESCAPE_UP);
-        break;
-
-        case PX_ASCII_UPPER_B:
-            pxEscapeSetType(self, PX_ESCAPE_DOWN);
-        break;
-
-        case PX_ASCII_UPPER_C:
-            pxEscapeSetType(self, PX_ESCAPE_RIGHT);
-        break;
-
-        case PX_ASCII_UPPER_D:
-            pxEscapeSetType(self, PX_ESCAPE_LEFT);
-        break;
-
-        case PX_ASCII_UPPER_H:
-            pxEscapeSetType(self, PX_ESCAPE_HOME);
-        break;
-
-        case PX_ASCII_UPPER_F:
-            pxEscapeSetType(self, PX_ESCAPE_END);
-        break;
-
-        case PX_ASCII_TILDE:
-            pxEscapeSetType(self, PX_ESCAPE_FUNCTION);
-        break;
-
-        default: break;
-    }
-
-    if (size != 0) *size = index + 1;
-
-    if (self->type == PX_ESCAPE_NONE) return 0;
+    if (value != 0) *value = temp;
 
     return 1;
-}
-
-pxb8
-pxEscapeGroupFromString8(PxEscape* self, PxString8 string)
-{
-    pxuword value = 0;
-    pxb8    state = 0;
-
-    PxFormatOption options = PX_FORMAT_OPTION_NONE;
-
-    switch (pxString8Contains(string, pxs8(":"))) {
-        case 0: {
-            pxiword group = self->size;
-
-            pxEscapeInsertGroupTail(self);
-
-            state = pxUnsignedFromString8(&value, 10, options, string);
-
-            if (state != 0)
-                pxEscapeInsertValueTail(self, group, value);
-
-            if (state != 0 || string.length == 0)
-                return 1;
-        } break;
-
-        default: break;
-    }
-
-    return 0;
 }
 
 #endif // PX_CORE_CONSOLE_ESCAPE_C

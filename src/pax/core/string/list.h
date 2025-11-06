@@ -3,15 +3,16 @@
 
 #include "convert.h"
 
-typedef struct PxStringNode
+typedef struct PxStringNode PxStringNode;
+
+struct PxStringNode
 {
     pxu8*   memory;
     pxiword length;
 
-    struct PxStringNode* next;
-    struct PxStringNode* prev;
-}
-PxStringNode;
+    PxStringNode* next;
+    PxStringNode* prev;
+};
 
 typedef struct PxStringList
 {

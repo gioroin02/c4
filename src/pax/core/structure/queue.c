@@ -37,7 +37,7 @@ pxQueueCopyAmount(PxArena* arena, PxQueue* value, pxiword amount)
 
     if (result.length <= 0) return result;
 
-    result.size = pxMin(result.length, value->size);
+    result.size = px_min(result.length, value->size);
     result.tail = result.size;
 
     for (pxiword i = 0; i < result.size; i += 1) {
@@ -255,7 +255,7 @@ pxQueueUpdateTailMemory(PxQueue* self, void* memory, pxiword stride)
 }
 
 pxb8
-pxQueueReadMemory(PxQueue* self, pxiword index, void* memory, pxiword stride)
+pxQueueGetMemory(PxQueue* self, pxiword index, void* memory, pxiword stride)
 {
     if (index < 0 || index >= self->size)
         return 0;
@@ -273,15 +273,15 @@ pxQueueReadMemory(PxQueue* self, pxiword index, void* memory, pxiword stride)
 }
 
 pxb8
-pxQueueReadHeadMemory(PxQueue* self, void* memory, pxiword stride)
+pxQueueGetHeadMemory(PxQueue* self, void* memory, pxiword stride)
 {
-    return pxQueueReadMemory(self, 0, memory, stride);
+    return pxQueueGetMemory(self, 0, memory, stride);
 }
 
 pxb8
-pxQueueReadTailMemory(PxQueue* self, void* memory, pxiword stride)
+pxQueueGetTailMemory(PxQueue* self, void* memory, pxiword stride)
 {
-    return pxQueueReadMemory(self, self->size - 1, memory, stride);
+    return pxQueueGetMemory(self, self->size - 1, memory, stride);
 }
 
 #endif // PX_CORE_STRUCTURE_QUEUE_C

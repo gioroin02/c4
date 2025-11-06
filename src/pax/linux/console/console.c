@@ -51,7 +51,7 @@ pxLinuxConsoleModeDefault(PxLinuxConsole* self)
 }
 
 pxb8
-pxLinuxConsoleModeEvent(PxLinuxConsole* self)
+pxLinuxConsoleModeMessage(PxLinuxConsole* self)
 {
     PxTermIO inout = self->inout;
 
@@ -75,14 +75,13 @@ pxLinuxConsoleModeEvent(PxLinuxConsole* self)
 }
 
 pxiword
-pxLinuxConsoleWriteMemory(PxLinuxConsole* self, void* memory, pxiword amount, pxiword stride)
+pxLinuxConsoleWrite(PxLinuxConsole* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    pxiword temp   = 0;
+    pxiword temp = 0;
 
     for (pxiword i = 0; i < length;) {
-        char* mem = pxCast(char*, memory + i);
-        int   len = pxCast(int,   length - i);
+        char* mem = px_as(char*, memory + i);
+        int   len = px_as(int,   length - i);
 
         do {
             temp = write(STDOUT_FILENO, mem, len);
@@ -98,13 +97,12 @@ pxLinuxConsoleWriteMemory(PxLinuxConsole* self, void* memory, pxiword amount, px
 }
 
 pxiword
-pxLinuxConsoleReadMemory(PxLinuxConsole* self, void* memory, pxiword amount, pxiword stride)
+pxLinuxConsoleRead(PxLinuxConsole* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    pxiword temp   = 0;
+    pxiword temp = 0;
 
-    char* mem = pxCast(char*, memory);
-    int   len = pxCast(int,   length);
+    char* mem = px_as(char*, memory);
+    int   len = px_as(int,   length);
 
     do {
         temp = read(STDIN_FILENO, mem, len);

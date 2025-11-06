@@ -1,5 +1,5 @@
-#ifndef PX_CORE_STRING_STRING32_C
-#define PX_CORE_STRING_STRING32_C
+#ifndef PX_CORE_STRING_STRING_32_C
+#define PX_CORE_STRING_STRING_32_C
 
 #include "string32.h"
 
@@ -20,7 +20,7 @@ PxString32
 pxString32FromMemory(void* memory, pxiword length)
 {
     for (pxiword i = 0; i < length; i += 1) {
-        if (pxCast(pxu32*, memory)[i] != 0)
+        if (px_as(pxu32*, memory)[i] != 0)
             continue;
 
         return pxString32Make(memory, i);
@@ -38,7 +38,7 @@ pxString32CopyUnicode(PxArena* arena, pxi32 value)
     if (result == 0 || length <= 0)
         return (PxString32) {0};
 
-    pxUtf32WriteMemory32Forw(result, length, 0, value);
+    pxUtf32WriteForw(result, length, 0, value);
 
     return pxString32Make(result, length);
 }
@@ -246,24 +246,24 @@ pxString32TrimSpaces(PxString32 self)
     for (; start < stop; start += units) {
         pxi32 unicode = 0;
 
-        units = pxUtf32ReadMemory32Forw(self.memory,
+        units = pxUtf32ReadForw(self.memory,
             self.length, start, &unicode);
 
         if (units <= 0) return (PxString32) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
     for (; start < stop; stop -= units) {
         pxi32 unicode = 0;
 
-        units = pxUtf32ReadMemory32Back(self.memory,
+        units = pxUtf32ReadBack(self.memory,
             self.length, stop - 1, &unicode);
 
         if (units <= 0) return (PxString32) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
@@ -280,12 +280,12 @@ pxString32TrimSpacesHead(PxString32 self)
     for (; start < stop; start += units) {
         pxi32 unicode = 0;
 
-        units = pxUtf32ReadMemory32Forw(self.memory,
+        units = pxUtf32ReadForw(self.memory,
             self.length, start, &unicode);
 
         if (units <= 0) return (PxString32) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
@@ -302,12 +302,12 @@ pxString32TrimSpacesTail(PxString32 self)
     for (; start < stop; stop -= units) {
         pxi32 unicode = 0;
 
-        units = pxUtf32ReadMemory32Back(self.memory,
+        units = pxUtf32ReadBack(self.memory,
             self.length, stop - 1, &unicode);
 
         if (units <= 0) return (PxString32) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
@@ -359,7 +359,7 @@ pxString32FindFirst(PxString32 self, pxiword start, PxString32 value, pxiword* i
 pxb8
 pxString32FindFirstMemory32(PxString32 self, pxiword start, pxu32* memory, pxiword length, pxiword* index)
 {
-    start = pxClamp(start, 0, self.length);
+    start = px_between(start, 0, self.length);
 
     for (pxiword i = start; i < self.length; i += 1) {
         PxString32 slice = pxString32SliceLength(self, i, length);
@@ -384,7 +384,7 @@ pxString32FindLast(PxString32 self, pxiword start, PxString32 value, pxiword* in
 pxb8
 pxString32FindLastMemory32(PxString32 self, pxiword start, pxu32* memory, pxiword length, pxiword* index)
 {
-    start = pxClamp(start, 0, self.length);
+    start = px_between(start, 0, self.length);
 
     for (pxiword i = start; i > 0; i -= 1) {
         PxString32 slice = pxString32SliceLength(self, i - length, length);
@@ -432,7 +432,7 @@ pxString32Next(PxString32 self, pxiword index, pxiword* units, pxi32* value)
     if (index < 0 || index >= self.length)
         return 0;
 
-    pxiword step = pxUtf32ReadMemory32Forw(self.memory,
+    pxiword step = pxUtf32ReadForw(self.memory,
         self.length, index, value);
 
     if (step == 0) return 0;
@@ -448,7 +448,7 @@ pxString32Prev(PxString32 self, pxiword index, pxiword* units, pxi32* value)
     if (index < 0 || index >= self.length)
         return 0;
 
-    pxiword step = pxUtf32ReadMemory32Back(self.memory,
+    pxiword step = pxUtf32ReadBack(self.memory,
         self.length, index, value);
 
     if (step == 0) return 0;
@@ -458,4 +458,4 @@ pxString32Prev(PxString32 self, pxiword index, pxiword* units, pxi32* value)
     return 1;
 }
 
-#endif // PX_CORE_STRING_STRING32_C
+#endif // PX_CORE_STRING_STRING_32_C

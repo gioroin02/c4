@@ -3,6 +3,8 @@
 
 #include "token.h"
 
+#include "scanner.h"
+
 #include "message.h"
 
 #include "reader.h"

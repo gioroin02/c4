@@ -4,43 +4,43 @@
 #include "import.h"
 
 #define pxArrayReserve(arena, t, length) \
-    pxArrayReserveMemory(arena, length, pxSize(t))
+    pxArrayReserveMemory(arena, length, px_size(t))
 
 #define pxArrayInsert(self, index, t, x) \
-    pxArrayInsertMemory(self, index, x, pxSize(t))
+    pxArrayInsertMemory(self, index, x, px_size(t))
 
 #define pxArrayInsertHead(self, t, x) \
-    pxArrayInsertHeadMemory(self, x, pxSize(t))
+    pxArrayInsertHeadMemory(self, x, px_size(t))
 
 #define pxArrayInsertTail(self, t, x) \
-    pxArrayInsertTailMemory(self, x, pxSize(t))
+    pxArrayInsertTailMemory(self, x, px_size(t))
 
 #define pxArrayRemove(self, index, t, x) \
-    pxArrayRemoveMemory(self, index, x, pxSize(t))
+    pxArrayRemoveMemory(self, index, x, px_size(t))
 
 #define pxArrayRemoveHead(self, t, x) \
-    pxArrayRemoveHeadMemory(self, x, pxSize(t))
+    pxArrayRemoveHeadMemory(self, x, px_size(t))
 
 #define pxArrayRemoveTail(self, t, x) \
-    pxArrayRemoveTailMemory(self, x, pxSize(t))
+    pxArrayRemoveTailMemory(self, x, px_size(t))
 
 #define pxArrayUpdate(self, index, t, x) \
-    pxArrayUpdateMemory(self, index, x, pxSize(t))
+    pxArrayUpdateMemory(self, index, x, px_size(t))
 
 #define pxArrayUpdateHead(self, t, x) \
-    pxArrayUpdateHeadMemory(self, x, pxSize(t))
+    pxArrayUpdateHeadMemory(self, x, px_size(t))
 
 #define pxArrayUpdateTail(self, t, x) \
-    pxArrayUpdateTailMemory(self, x, pxSize(t))
+    pxArrayUpdateTailMemory(self, x, px_size(t))
 
-#define pxArrayRead(self, index, t, x) \
-    pxArrayReadMemory(self, index, x, pxSize(t))
+#define pxArrayGet(self, index, t, x) \
+    pxArrayGetMemory(self, index, x, px_size(t))
 
-#define pxArrayReadHead(self, t, x) \
-    pxArrayReadHeadMemory(self, x, pxSize(t))
+#define pxArrayGetHead(self, t, x) \
+    pxArrayGetHeadMemory(self, x, px_size(t))
 
-#define pxArrayReadTail(self, t, x) \
-    pxArrayReadTailMemory(self, x, pxSize(t))
+#define pxArrayGetTail(self, t, x) \
+    pxArrayGetTailMemory(self, x, px_size(t))
 
 typedef struct
 {
@@ -112,12 +112,12 @@ pxb8
 pxArrayUpdateTailMemory(PxArray* self, void* memory, pxiword stride);
 
 pxb8
-pxArrayReadMemory(PxArray* self, pxiword index, void* memory, pxiword stride);
+pxArrayGetMemory(PxArray* self, pxiword index, void* memory, pxiword stride);
 
 pxb8
-pxArrayReadHeadMemory(PxArray* self, void* memory, pxiword stride);
+pxArrayGetHeadMemory(PxArray* self, void* memory, pxiword stride);
 
 pxb8
-pxArrayReadTailMemory(PxArray* self, void* memory, pxiword stride);
+pxArrayGetTailMemory(PxArray* self, void* memory, pxiword stride);
 
 #endif // PX_CORE_STRUCTURE_ARRAY_H

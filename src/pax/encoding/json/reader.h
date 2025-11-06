@@ -1,27 +1,45 @@
 #ifndef PX_ENCODING_JSON_READER_H
 #define PX_ENCODING_JSON_READER_H
 
-#include "token.h"
+#include "scanner.h"
 #include "message.h"
+
+typedef enum PxJsonReaderFlag
+{
+    PX_JSON_READER_NONE = 0,
+    PX_JSON_READER_COMMA = 1 << 0,
+    PX_JSON_READER_COLON = 1 << 1,
+}
+PxJsonReaderFlag;
 
 typedef struct PxJsonReader
 {
-    PxQueue   stack;
-    PxString8 name;
-    pxb8      colon;
-    pxb8      comma;
+    PxSource source;
+    PxQueue  stack;
 
-    PxReader* reader;
+    PxJsonReaderFlag flags;
+
+    PxString8   name;
+    PxJsonToken token;
 }
 PxJsonReader;
 
 PxJsonReader
-pxJsonReaderMake(PxArena* arena, pxiword length, PxReader* reader);
+pxJsonReaderReserve(PxSource source, PxArena* arena, pxiword length);
 
 PxJsonMsg
-pxJsonReadMessage(PxJsonReader* self, PxArena* arena);
+pxJsonReaderMsg(PxJsonReader* self, PxArena* arena);
 
 pxb8
-pxJsonExpectMessage(PxJsonReader* self, PxArena* arena, PxJsonMsgType type);
+pxJsonReaderObjectOpen(PxJsonReader* self, PxArena* arena, PxJsonMsg* message);
+
+pxb8
+pxJsonReaderObjectClose(PxJsonReader* self, PxArena* arena, PxJsonMsg* message);
+
+pxb8
+pxJsonReaderArrayOpen(PxJsonReader* self, PxArena* arena, PxJsonMsg* message);
+
+pxb8
+pxJsonReaderArrayClose(PxJsonReader* self, PxArena* arena, PxJsonMsg* message);
 
 #endif // PX_ENCODING_JSON_READER_H

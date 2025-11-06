@@ -13,7 +13,7 @@
 pxiword
 pxLinuxMemoryPageSize()
 {
-    return pxCast(pxiword, sysconf(_SC_PAGESIZE));
+    return px_as(pxiword, sysconf(_SC_PAGESIZE));
 }
 
 PxArena
@@ -34,10 +34,7 @@ pxLinuxMemoryReserve(pxiword amount)
 
     if (result == MAP_FAILED) return (PxArena) {0};
 
-    return (PxArena) {
-        .memory = result,
-        .length = length,
-    };
+    return pxArenaMake(result, length);
 }
 
 void

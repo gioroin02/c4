@@ -1,6 +1,6 @@
-#ifndef PX_STREAM_IMPORT_H
-#define PX_STREAM_IMPORT_H
+#ifndef PX_CORE_STREAM_IMPORT_H
+#define PX_CORE_STREAM_IMPORT_H
 
-#include "../format/export.h"
+#include "../string/export.h"
 
-#endif // PX_STREAM_IMPORT_H
+#endif // PX_CORE_STREAM_IMPORT_H

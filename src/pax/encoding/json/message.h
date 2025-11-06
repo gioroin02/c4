@@ -31,16 +31,18 @@ typedef enum PxJsonMsgType
     PX_JSON_MSG_BOOLEAN,
     PX_JSON_MSG_NULL,
 
+    PX_JSON_MSG_DELEGATE,
+
     PX_JSON_MSG_COUNT,
 }
 PxJsonMsgType;
 
-typedef struct PxJsonMsgError
+typedef struct PxJsonMsgDelegate
 {
-    PxString8 subject;
-    PxString8 content;
+    void* ctxt;
+    void* proc;
 }
-PxJsonMsgError;
+PxJsonMsgDelegate;
 
 typedef struct PxJsonMsg
 {
@@ -49,22 +51,22 @@ typedef struct PxJsonMsg
 
     union
     {
-        PxJsonMsgError error;
-
         PxString8 string_8;
         pxuword   unsigned_word;
         pxiword   integer_word;
         pxfword   floating_word;
         pxbword   boolean_word;
+
+        PxJsonMsgDelegate delegate;
     };
 }
 PxJsonMsg;
 
 PxJsonMsg
-pxJsonMsgNone();
+pxJsonMsgMake(PxJsonMsgType type);
 
 PxJsonMsg
-pxJsonMsgError(PxString8 subject, PxString8 message);
+pxJsonMsgError();
 
 PxJsonMsg
 pxJsonMsgObjectOpen();
@@ -82,24 +84,30 @@ PxJsonMsg
 pxJsonMsgName(PxString8 name);
 
 PxJsonMsg
-pxJsonMsgString(PxString8 value, PxString8 name);
+pxJsonMsgString(PxString8 value);
 
 PxJsonMsg
-pxJsonMsgUnsigned(pxuword value, PxString8 name);
+pxJsonMsgUnsigned(pxuword value);
 
 PxJsonMsg
-pxJsonMsgInteger(pxiword value, PxString8 name);
+pxJsonMsgInteger(pxiword value);
 
 PxJsonMsg
-pxJsonMsgFloating(pxfword value, PxString8 name);
+pxJsonMsgFloating(pxfword value);
 
 PxJsonMsg
-pxJsonMsgBoolean(pxbword value, PxString8 name);
+pxJsonMsgBoolean(pxbword value);
 
 PxJsonMsg
-pxJsonMsgNull(PxString8 name);
+pxJsonMsgNull();
+
+PxJsonMsg
+pxJsonMsgDelegate(void* ctxt, void* proc);
 
 PxJsonMsg
 pxJsonMsgCount();
+
+PxJsonMsg
+pxJsonMsgPair(PxString8 name, PxJsonMsg message);
 
 #endif // PX_ENCODING_JSON_MESSAGE_H

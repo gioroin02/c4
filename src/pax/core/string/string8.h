@@ -1,9 +1,13 @@
-#ifndef PX_CORE_STRING_STRING8_H
-#define PX_CORE_STRING_STRING8_H
+#ifndef PX_CORE_STRING_STRING_8_H
+#define PX_CORE_STRING_STRING_8_H
 
-#include "utf8.h"
+#include "unicode.h"
 
-#define pxs8(x) (PxString8) {.memory = pxCast(pxu8*, x), .length = pxSizeArray(pxu8, x) - 1}
+#define pxs8(x) \
+    (PxString8) {px_as(pxu8*, x), px_size_array(pxu8, x) - 1}
+
+#define pxString8Vargs(x, ...) \
+    (PxString8) {px_array_from_vargs(pxu8, x, __VA_ARGS__), px_size_vargs(pxu8, x, __VA_ARGS__)}
 
 typedef struct PxString8
 {
@@ -123,4 +127,4 @@ pxString8Next(PxString8 self, pxiword index, pxiword* units, pxi32* value);
 pxb8
 pxString8Prev(PxString8 self, pxiword index, pxiword* units, pxi32* value);
 
-#endif // PX_CORE_STRING_STRING8_H
+#endif // PX_CORE_STRING_STRING_8_H

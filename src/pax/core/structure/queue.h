@@ -4,37 +4,37 @@
 #include "import.h"
 
 #define pxQueueReserve(arena, t, length) \
-    pxQueueReserveMemory(arena, length, pxSize(t))
+    pxQueueReserveMemory(arena, length, px_size(t))
 
 #define pxQueueInsertHead(self, t, x) \
-    pxQueueInsertHeadMemory(self, x, pxSize(t))
+    pxQueueInsertHeadMemory(self, x, px_size(t))
 
 #define pxQueueInsertTail(self, t, x) \
-    pxQueueInsertTailMemory(self, x, pxSize(t))
+    pxQueueInsertTailMemory(self, x, px_size(t))
 
 #define pxQueueRemoveHead(self, t, x) \
-    pxQueueRemoveHeadMemory(self, x, pxSize(t))
+    pxQueueRemoveHeadMemory(self, x, px_size(t))
 
 #define pxQueueRemoveTail(self, t, x) \
-    pxQueueRemoveTailMemory(self, x, pxSize(t))
+    pxQueueRemoveTailMemory(self, x, px_size(t))
 
 #define pxQueueUpdate(self, index, t, x) \
-    pxQueueUpdateMemory(self, index, x, pxSize(t))
+    pxQueueUpdateMemory(self, index, x, px_size(t))
 
 #define pxQueueUpdateHead(self, t, x) \
-    pxQueueUpdateHeadMemory(self, x, pxSize(t))
+    pxQueueUpdateHeadMemory(self, x, px_size(t))
 
 #define pxQueueUpdateTail(self, t, x) \
-    pxQueueUpdateTailMemory(self, x, pxSize(t))
+    pxQueueUpdateTailMemory(self, x, px_size(t))
 
-#define pxQueueRead(self, index, t, x) \
-    pxQueueReadMemory(self, index, x, pxSize(t))
+#define pxQueueGet(self, index, t, x) \
+    pxQueueGetMemory(self, index, x, px_size(t))
 
-#define pxQueueReadHead(self, t, x) \
-    pxQueueReadHeadMemory(self, x, pxSize(t))
+#define pxQueueGetHead(self, t, x) \
+    pxQueueGetHeadMemory(self, x, px_size(t))
 
-#define pxQueueReadTail(self, t, x) \
-    pxQueueReadTailMemory(self, x, pxSize(t))
+#define pxQueueGetTail(self, t, x) \
+    pxQueueGetTailMemory(self, x, px_size(t))
 
 typedef struct
 {
@@ -96,12 +96,12 @@ pxb8
 pxQueueUpdateTailMemory(PxQueue* self, void* memory, pxiword stride);
 
 pxb8
-pxQueueReadMemory(PxQueue* self, pxiword index, void* memory, pxiword stride);
+pxQueueGetMemory(PxQueue* self, pxiword index, void* memory, pxiword stride);
 
 pxb8
-pxQueueReadHeadMemory(PxQueue* self, void* memory, pxiword stride);
+pxQueueGetHeadMemory(PxQueue* self, void* memory, pxiword stride);
 
 pxb8
-pxQueueReadTailMemory(PxQueue* self, void* memory, pxiword stride);
+pxQueueGetTailMemory(PxQueue* self, void* memory, pxiword stride);
 
 #endif // PX_CORE_STRUCTURE_QUEUE_H

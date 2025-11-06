@@ -23,7 +23,7 @@ pxb8
 c4ServerStart(C4Server* self, PxAddress address, pxu16 port)
 {
     pxLoggerTrace(LOGGER, "Attivazione porta ${0} ...\n",
-        pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, port));
+        pxFormatCmdUnsigned(10, 0, port));
 
     pxb8 state = pxSocketTcpBind(self->socket, address, port);
 
@@ -42,6 +42,16 @@ c4ServerStart(C4Server* self, PxAddress address, pxu16 port)
 }
 
 void
+c4ServerClose(C4Server* self)
+{
+    if (self == 0) return;
+
+    pxSocketTcpDestroy(self->socket);
+
+    self->socket = 0;
+}
+
+void
 c4ServerStop(C4Server* self)
 {
     if (self == 0) return;
@@ -49,7 +59,7 @@ c4ServerStop(C4Server* self)
     for (pxiword i = 0; i < self->sessions.size; i += 1) {
         C4Session* session = 0;
 
-        pxArrayRead(&self->sessions, i,
+        pxArrayGet(&self->sessions, i,
             C4Session*, &session);
 
         c4SessionClose(self, session);
@@ -66,7 +76,7 @@ c4ServerBroadcast(C4Server* self, PxArena* arena, C4Session* from, C4Msg value)
     for (pxiword i = 0; i < self->sessions.size; i += 1) {
         C4Session* session = 0;
 
-        pxArrayRead(&self->sessions, i,
+        pxArrayGet(&self->sessions, i,
             C4Session*, &session);
 
         if (session == from) continue;
@@ -81,7 +91,7 @@ c4ServerFind(C4Server* self, C4Session* value)
     for (pxiword i = 0; i < self->sessions.size; i += 1) {
         C4Session* session = 0;
 
-        pxArrayRead(&self->sessions, i,
+        pxArrayGet(&self->sessions, i,
             C4Session*, &session);
 
         if (session == value) return i + 1;
@@ -93,7 +103,7 @@ c4ServerFind(C4Server* self, C4Session* value)
 pxb8
 c4ServerGet(C4Server* self, pxiword index, C4Session** value)
 {
-    return pxArrayRead(&self->sessions, index, C4Session*, value);
+    return pxArrayGet(&self->sessions, index, C4Session*, value);
 }
 
 C4Session*
@@ -101,7 +111,7 @@ c4ServerGetOr(C4Server* self, pxiword index, C4Session* value)
 {
     C4Session* result = 0;
 
-    if (pxArrayRead(&self->sessions, index, C4Session*, &result) == 0)
+    if (pxArrayGet(&self->sessions, index, C4Session*, &result) == 0)
         return value;
 
     return result;
@@ -135,11 +145,11 @@ c4SessionOpen(C4Server* self, PxArena* arena)
                 pxu8 format[] = "Aperta sessione con {addr = [${0}.${1}.${2}.${3}], port = ${4}} ...\n";
 
                 pxLoggerInfo(LOGGER, format,
-                    pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.a),
-                    pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.b),
-                    pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.c),
-                    pxFormatCmdUnsigned8(10, PX_FORMAT_OPTION_NONE, address.ip4.d),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, port));
+                    pxFormatCmdUnsigned(10, 0, address.ip4.a),
+                    pxFormatCmdUnsigned(10, 0, address.ip4.b),
+                    pxFormatCmdUnsigned(10, 0, address.ip4.c),
+                    pxFormatCmdUnsigned(10, 0, address.ip4.d),
+                    pxFormatCmdUnsigned(10, 0, port));
             } break;
 
             case PX_ADDRESS_TYPE_IP6: {
@@ -147,15 +157,15 @@ c4SessionOpen(C4Server* self, PxArena* arena)
                     "Aperta sessione con {addr = [${0}:${1}:${2}:${3}:${4}:${5}:${6}:${7}], port = ${8}} ...\n";
 
                 pxLoggerInfo(LOGGER, format,
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.a),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.b),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.c),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.d),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.e),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.f),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.g),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, address.ip6.h),
-                    pxFormatCmdUnsigned16(10, PX_FORMAT_OPTION_NONE, port));
+                    pxFormatCmdUnsigned(10, 0, address.ip6.a),
+                    pxFormatCmdUnsigned(10, 0, address.ip6.b),
+                    pxFormatCmdUnsigned(10, 0, address.ip6.c),
+                    pxFormatCmdUnsigned(10, 0, address.ip6.d),
+                    pxFormatCmdUnsigned(10, 0, address.ip6.e),
+                    pxFormatCmdUnsigned(10, 0, address.ip6.f),
+                    pxFormatCmdUnsigned(10, 0, address.ip6.g),
+                    pxFormatCmdUnsigned(10, 0, address.ip6.h),
+                    pxFormatCmdUnsigned(10, 0, port));
             } break;
 
             default: break;
@@ -224,15 +234,13 @@ c4SessionRead(C4Session* self, PxArena* arena)
 
     pxb8 state = c4JsonReadMsg(&result, &reader, arena);
 
-    pxLoggerTrace(LOGGER, "Lettura di ${0}\n",
-        pxFormatCmdDelegate(&result, &c4FormatProcMsg));
+    if (state != 0) {
+        pxLoggerInfo(LOGGER, "Lettura di ${0}\n",
+            pxFormatCmdDelegate(&result, &c4FormatProcMsg));
+    } else
+        pxLoggerError(LOGGER, "Lettura fallita\n", {0});
 
     pxArenaRewind(arena, offset);
-
-    if (state != 0)
-        pxLoggerInfo(LOGGER, "Lettura riuscita\n", {0});
-    else
-        pxLoggerError(LOGGER, "Lettura fallita\n", {0});
 
     return result;
 }

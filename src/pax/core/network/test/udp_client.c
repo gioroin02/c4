@@ -2,19 +2,19 @@
 
 #include <stdio.h>
 
-#define RED(x)    "\x1b[31m" pxString(x) "\x1b[0m"
-#define GREEN(x)  "\x1b[32m" pxString(x) "\x1b[0m"
-#define YELLOW(x) "\x1b[33m" pxString(x) "\x1b[0m"
-#define BLUE(x)   "\x1b[34m" pxString(x) "\x1b[0m"
-#define PURPLE(x) "\x1b[35m" pxString(x) "\x1b[0m"
-#define AZURE(x)  "\x1b[36m" pxString(x) "\x1b[0m"
+#define RED(x) "\x1b[91m" x "\x1b[0m"
+#define GRN(x) "\x1b[92m" x "\x1b[0m"
+#define YLW(x) "\x1b[93m" x "\x1b[0m"
+#define BLU(x) "\x1b[94m" x "\x1b[0m"
+#define MAG(x) "\x1b[95m" x "\x1b[0m"
+#define CYA(x) "\x1b[96m" x "\x1b[0m"
 
-#define PANIC PURPLE(PANIC)
-#define ERROR RED(ERROR)
-#define WARN  YELLOW(WARN)
-#define INFO  BLUE(INFO)
-#define DEBUG GREEN(DEBUG)
-#define TRACE AZURE(TRACE)
+#define FATAL MAG("FATAL")
+#define ERROR RED("ERROR")
+#define WARN  YLW("WARN")
+#define INFO  BLU("INFO")
+#define DEBUG GRN("DEBUG")
+#define TRACE CYA("TRACE")
 
 #define CLIENT_MSG pxs8("Hello server!")
 
@@ -24,18 +24,19 @@
 
 typedef struct ClientConfig
 {
-    PxAddress addr;
-    pxu16     port;
+    PxAddr  addr;
+    pxuword port;
 }
 ClientConfig;
 
-typedef struct ClientState
+typedef struct Client
 {
     PxSocketUdp socket;
-    PxBuffer8   request;
-    PxBuffer8   response;
+
+    PxBuffer8 request;
+    PxBuffer8 response;
 }
-ClientState;
+Client;
 
 int
 main(int argc, char** argv)
@@ -45,13 +46,11 @@ main(int argc, char** argv)
     if (pxNetworkStart() == 0) return 1;
 
     ClientConfig config = {
-        .addr = pxAddressLocalhost(PX_ADDRESS_TYPE_IP4),
+        .addr = pxAddrLocalhost(PX_ADDR_TYPE_IP4),
         .port = 8000,
     };
 
     if (argc > 1) {
-        PxFormatOption options = PX_FORMAT_OPTION_NONE;
-
         for (pxiword i = 1; i < argc; i += 1) {
             PxString8 arg = pxString8FromMemory(argv[i], 32);
 
@@ -59,26 +58,26 @@ main(int argc, char** argv)
                 arg = pxString8TrimPrefix(arg, CLIENT_ARG_IPV4);
                 arg = pxString8TrimSpaces(arg);
 
-                pxAddressFromString8(&config.addr, PX_ADDRESS_TYPE_IP4, arg);
+                pxAddrFromString8(arg, &config.addr, PX_ADDR_TYPE_IP4);
             }
 
             if (pxString8BeginsWith(arg, CLIENT_ARG_IPV6) != 0) {
                 arg = pxString8TrimPrefix(arg, CLIENT_ARG_IPV6);
                 arg = pxString8TrimSpaces(arg);
 
-                pxAddressFromString8(&config.addr, PX_ADDRESS_TYPE_IP6, arg);
+                pxAddrFromString8(arg, &config.addr, PX_ADDR_TYPE_IP6);
             }
 
             if (pxString8BeginsWith(arg, CLIENT_ARG_PORT) != 0) {
                 arg = pxString8TrimPrefix(arg, CLIENT_ARG_PORT);
                 arg = pxString8TrimSpaces(arg);
 
-                pxUnsigned16FromString8(&config.port, 10, options, arg);
+                pxUnsignedFromString8(arg, &config.port, PX_FORMAT_RADIX_10, 0);
             }
         }
     }
 
-    ClientState client = {0};
+    Client client = {0};
 
     client.socket = pxSocketUdpCreate(&arena, config.addr.type);
 
@@ -90,20 +89,22 @@ main(int argc, char** argv)
     pxBuffer8WriteString8Tail(&client.request, CLIENT_MSG);
 
     pxSocketUdpWriteHost(client.socket,
-        &client.request, config.addr, config.port);
+        client.request.memory, client.request.size, config.addr, config.port);
 
-    PxAddress addr = {0};
+    client.request.size = 0;
+
+    PxAddr addr = {0};
     pxu16     port = 0;
 
-    pxb8 state = pxSocketUdpReadHost(client.socket,
-        &client.response, &addr, &port);
+    client.response.size = pxSocketUdpReadHost(client.socket,
+        client.response.memory, client.response.length, &addr, &port);
 
-    if (state != 0) {
-        if (port == config.port && pxAddressIsEqual(addr, config.addr) != 0) {
+    if (client.response.size != 0) {
+        if (port == config.port && pxAddrIsEqual(addr, config.addr) != 0) {
             PxString8 string = pxBuffer8ReadString8Head(
                 &client.response, &arena, client.response.size);
 
-            printf(INFO " " BLUE('%s') "\n", string.memory);
+            printf(INFO " " BLU("'%s'") "\n", string.memory);
         } else
             printf(ERROR " Indirizzo o porta inaspettati...\n");
     }

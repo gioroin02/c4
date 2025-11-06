@@ -21,10 +21,10 @@ set "encoding=%json%"
 
 set "winsock=-lws2_32"
 
-set "client=src\game\export.c src\server\export.c"
+set "server=src\game\export.c src\server\export.c"
 
 set "lib=%winsock%"
-set "src=%core% %encoding% %client%"
+set "src=%core% %encoding% %server%"
 set "dir=src\server\test"
 
 zig cc %src% "%dir%\server.c" %lib% -o game_server.exe

@@ -1,8 +1,7 @@
 #ifndef PX_CORE_CONSOLE_CONSOLE_H
 #define PX_CORE_CONSOLE_CONSOLE_H
 
-#include "command.h"
-#include "message.h"
+#include "import.h"
 
 typedef void* PxConsole;
 
@@ -21,21 +20,15 @@ pxb8
 pxConsoleSetMode(PxConsole self, PxConsoleMode mode);
 
 pxiword
-pxConsoleWrite(PxConsole self, PxBuffer8* buffer);
+pxConsoleWrite(PxConsole self, pxu8* memory, pxiword length);
 
 pxiword
-pxConsoleWriteMemory(PxConsole self, void* memory, pxiword amount, pxiword stride);
+pxConsoleRead(PxConsole self, pxu8* memory, pxiword length);
 
-pxiword
-pxConsoleRead(PxConsole self, PxBuffer8* buffer);
+PxSource
+pxSourceFromConsole(PxConsole self);
 
-pxiword
-pxConsoleReadMemory(PxConsole self, void* memory, pxiword amount, pxiword stride);
-
-PxWriter
-pxConsoleWriter(PxConsole self, PxArena* arena, pxiword length);
-
-PxReader
-pxConsoleReader(PxConsole self, PxArena* arena, pxiword length);
+PxTarget
+pxTargetFromConsole(PxConsole self);
 
 #endif // PX_CORE_CONSOLE_CONSOLE_H

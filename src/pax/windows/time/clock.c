@@ -49,7 +49,7 @@ pxWindowsClockElapsed(PxWindowsClock* self)
     pxuword diff = self->curr.QuadPart - self->last.QuadPart;
     pxuword freq = self->freq.QuadPart;
 
-    return pxCast(pxf32, diff) / pxCast(pxf32, freq);
+    return px_as(pxf32, diff) / px_as(pxf32, freq);
 }
 
 #endif // PX_WINDOWS_TIME_CLOCK_C

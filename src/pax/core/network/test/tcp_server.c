@@ -2,45 +2,47 @@
 
 #include <stdio.h>
 
-#define RED(x)    "\x1b[31m" pxString(x) "\x1b[0m"
-#define GREEN(x)  "\x1b[32m" pxString(x) "\x1b[0m"
-#define YELLOW(x) "\x1b[33m" pxString(x) "\x1b[0m"
-#define BLUE(x)   "\x1b[34m" pxString(x) "\x1b[0m"
-#define PURPLE(x) "\x1b[35m" pxString(x) "\x1b[0m"
-#define AZURE(x)  "\x1b[36m" pxString(x) "\x1b[0m"
+#define RED(x) "\x1b[91m" x "\x1b[0m"
+#define GRN(x) "\x1b[92m" x "\x1b[0m"
+#define YLW(x) "\x1b[93m" x "\x1b[0m"
+#define BLU(x) "\x1b[94m" x "\x1b[0m"
+#define MAG(x) "\x1b[95m" x "\x1b[0m"
+#define CYA(x) "\x1b[96m" x "\x1b[0m"
 
-#define PANIC PURPLE(PANIC)
-#define ERROR RED(ERROR)
-#define WARN  YELLOW(WARN)
-#define INFO  BLUE(INFO)
-#define DEBUG GREEN(DEBUG)
-#define TRACE AZURE(TRACE)
+#define FATAL MAG("FATAL")
+#define ERROR RED("ERROR")
+#define WARN  YLW("WARN")
+#define INFO  BLU("INFO")
+#define DEBUG GRN("DEBUG")
+#define TRACE CYA("TRACE")
 
 #define SERVER_MSG pxs8("Hello client!")
 
-#define SERVER_ARG_IP_VERSION pxs8("--server-ip-version=")
-#define SERVER_ARG_PORT       pxs8("--server-port=")
-#define SERVER_ARG_LIFETIME   pxs8("--server-lifetime=")
+#define SERVER_ARG_IP4      pxs8("--server-ipv4")
+#define SERVER_ARG_IP6      pxs8("--server-ipv6")
+#define SERVER_ARG_PORT     pxs8("--server-port=")
+#define SERVER_ARG_LIFETIME pxs8("--server-lifetime=")
 
 typedef struct ServerConfig
 {
-    PxAddressType type;
-    pxu16         port;
-    pxu32         lifetime;
+    PxAddrType type;
+    pxuword    port;
+    pxuword    lifetime;
 }
 ServerConfig;
 
-typedef struct ServerState
+typedef struct Server
 {
     PxSocketTcp socket;
 }
-ServerState;
+Server;
 
 typedef struct ServerSession
 {
     PxSocketTcp socket;
-    PxBuffer8   request;
-    PxBuffer8   response;
+
+    PxBuffer8 request;
+    PxBuffer8 response;
 }
 ServerSession;
 
@@ -52,50 +54,43 @@ main(int argc, char** argv)
     if (pxNetworkStart() == 0) return 1;
 
     ServerConfig config = {
-        .type = PX_ADDRESS_TYPE_IP4,
-        .port = 8000,
+        .type     = PX_ADDR_TYPE_IP4,
+        .port     = 8000,
         .lifetime = 1,
     };
 
     if (argc > 1) {
-        PxFormatOption options = PX_FORMAT_OPTION_NONE;
-
         for (pxiword i = 1; i < argc; i += 1) {
             PxString8 arg = pxString8FromMemory(argv[i], 32);
 
-            if (pxString8BeginsWith(arg, SERVER_ARG_IP_VERSION) != 0) {
-                arg = pxString8TrimPrefix(arg, SERVER_ARG_IP_VERSION);
-                arg = pxString8TrimSpaces(arg);
-
-                if (pxString8IsEqual(arg, pxs8("ipv6")) != 0)
-                    config.type = PX_ADDRESS_TYPE_IP6;
-            }
+            if (pxString8IsEqual(arg, SERVER_ARG_IP4) != 0) config.type = PX_ADDR_TYPE_IP4;
+            if (pxString8IsEqual(arg, SERVER_ARG_IP6) != 0) config.type = PX_ADDR_TYPE_IP6;
 
             if (pxString8BeginsWith(arg, SERVER_ARG_PORT) != 0) {
                 arg = pxString8TrimPrefix(arg, SERVER_ARG_PORT);
                 arg = pxString8TrimSpaces(arg);
 
-                pxUnsigned16FromString8(&config.port, 10, options, arg);
+                pxUnsignedFromString8(arg, &config.port, PX_FORMAT_RADIX_10, 0);
             }
 
             if (pxString8BeginsWith(arg, SERVER_ARG_LIFETIME) != 0) {
                 arg = pxString8TrimPrefix(arg, SERVER_ARG_LIFETIME);
                 arg = pxString8TrimSpaces(arg);
 
-                pxUnsigned32FromString8(&config.lifetime, 10, options, arg);
+                pxUnsignedFromString8(arg, &config.lifetime, PX_FORMAT_RADIX_10, 0);
             }
         }
     }
 
-    ServerState server = {0};
+    Server server = {0};
 
     server.socket = pxSocketTcpCreate(&arena, config.type);
 
     if (server.socket == 0) return 1;
 
-    PxAddress address = pxAddressAny(config.type);
+    PxAddr addr = pxAddrAny(config.type);
 
-    if (pxSocketTcpBind(server.socket, address, config.port) == 0)
+    if (pxSocketTcpBind(server.socket, addr, config.port) == 0)
         return 1;
 
     if (pxSocketTcpListen(server.socket) == 0) return 1;
@@ -112,17 +107,20 @@ main(int argc, char** argv)
         session.request  = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
         session.response = pxBuffer8Reserve(&arena, PX_MEMORY_KIB);
 
-        pxb8 state = pxSocketTcpRead(session.socket, &session.request);
+        PxSource source = pxSourceFromSocketTcp(session.socket);
+        PxTarget target = pxTargetFromSocketTcp(session.socket);
 
-        if (state != 0) {
+        pxiword size = pxSourceReadBuffer8(source, &session.request);
+
+        if (size != 0) {
             PxString8 string = pxBuffer8ReadString8Head(
                 &session.request, &arena, session.request.size);
 
-            printf(INFO " " BLUE('%s') "\n", string.memory);
+            printf(INFO " " BLU("'%s'") "\n", string.memory);
 
             pxBuffer8WriteString8Tail(&session.response, SERVER_MSG);
 
-            pxSocketTcpWrite(session.socket, &session.response);
+            pxTargetWriteBuffer8(target, &session.response);
         }
 
         pxSocketTcpDestroy(session.socket);

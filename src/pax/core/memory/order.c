@@ -8,7 +8,7 @@ pxByteOrder()
 {
     pxu16 word = 0x0001;
 
-    switch (pxCast(pxu8*, &word)[0]) {
+    switch (px_as(pxu8*, &word)[0]) {
         case 0:
             return PX_BYTE_ORDER_NETWORK;
 

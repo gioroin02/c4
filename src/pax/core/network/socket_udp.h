@@ -1,62 +1,44 @@
 #ifndef PX_CORE_NETWORK_SOCKET_UDP_H
 #define PX_CORE_NETWORK_SOCKET_UDP_H
 
-#include "address.h"
+#include "addr.h"
 
 typedef void* PxSocketUdp;
 
 PxSocketUdp
-pxSocketUdpCreate(PxArena* arena, PxAddressType type);
+pxSocketUdpCreate(PxArena* arena, PxAddrType type);
 
 void
 pxSocketUdpDestroy(PxSocketUdp self);
 
-PxAddress
-pxSocketUdpGetAddress(PxSocketUdp self);
+PxAddr
+pxSocketUdpGetAddr(PxSocketUdp self);
 
 pxu16
 pxSocketUdpGetPort(PxSocketUdp self);
 
 pxb8
-pxSocketUdpBind(PxSocketUdp self, PxAddress address, pxu16 port);
+pxSocketUdpBind(PxSocketUdp self, PxAddr addr, pxu16 port);
 
 pxb8
 pxSocketUdpListen(PxSocketUdp self);
 
 pxb8
-pxSocketUdpConnect(PxSocketUdp self, PxAddress address, pxu16 port);
+pxSocketUdpConnect(PxSocketUdp self, PxAddr addr, pxu16 port);
 
 PxSocketUdp
 pxSocketUdpAccept(PxSocketUdp self, PxArena* arena);
 
 pxiword
-pxSocketUdpWrite(PxSocketUdp self, PxBuffer8* buffer);
+pxSocketUdpWrite(PxSocketUdp self, pxu8* memory, pxiword length);
 
 pxiword
-pxSocketUdpWriteMemory(PxSocketUdp self, void* memory, pxiword amount, pxiword stride);
+pxSocketUdpWriteHost(PxSocketUdp self, pxu8* memory, pxiword length, PxAddr addr, pxu16 port);
 
 pxiword
-pxSocketUdpWriteHost(PxSocketUdp self, PxBuffer8* buffer, PxAddress address, pxu16 port);
+pxSocketUdpRead(PxSocketUdp self, pxu8* memory, pxiword length);
 
 pxiword
-pxSocketUdpWriteHostMemory(PxSocketUdp self, void* memory, pxiword amount, pxiword stride, PxAddress address, pxu16 port);
-
-pxiword
-pxSocketUdpRead(PxSocketUdp self, PxBuffer8* buffer);
-
-pxiword
-pxSocketUdpReadMemory(PxSocketUdp self, void* memory, pxiword amount, pxiword stride);
-
-pxiword
-pxSocketUdpReadHost(PxSocketUdp self, PxBuffer8* buffer, PxAddress* address, pxu16* port);
-
-pxiword
-pxSocketUdpReadHostMemory(PxSocketUdp self, void* memory, pxiword amount, pxiword stride, PxAddress* address, pxu16* port);
-
-PxReader
-pxSocketUdpReader(PxSocketUdp self, PxArena* arena, pxiword length);
-
-PxWriter
-pxSocketUdpWriter(PxSocketUdp self, PxArena* arena, pxiword length);
+pxSocketUdpReadHost(PxSocketUdp self, pxu8* memory, pxiword length, PxAddr* addr, pxu16* port);
 
 #endif // PX_CORE_NETWORK_SOCKET_UDP_H

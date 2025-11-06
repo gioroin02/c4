@@ -51,7 +51,7 @@ pxWindowsConsoleModeDefault(PxWindowsConsole* self)
 }
 
 pxb8
-pxWindowsConsoleModeEvent(PxWindowsConsole* self)
+pxWindowsConsoleModeMessage(PxWindowsConsole* self)
 {
     HANDLE input  = GetStdHandle(STD_INPUT_HANDLE);
     HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -69,16 +69,14 @@ pxWindowsConsoleModeEvent(PxWindowsConsole* self)
 }
 
 pxiword
-pxWindowsConsoleWriteMemory(PxWindowsConsole* self, void* memory, pxiword amount, pxiword stride)
+pxWindowsConsoleWrite(PxWindowsConsole* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    DWORD   temp   = 0;
-
     HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD  temp   = 0;
 
     for (pxiword i = 0; i < length;) {
-        char* mem = pxCast(char*, memory + i);
-        int   len = pxCast(int,   length - i);
+        char* mem = px_as(char*, memory + i);
+        int   len = px_as(int,   length - i);
 
         pxb32 state = WriteFile(output, mem, len, &temp, 0);
 
@@ -92,15 +90,13 @@ pxWindowsConsoleWriteMemory(PxWindowsConsole* self, void* memory, pxiword amount
 }
 
 pxiword
-pxWindowsConsoleReadMemory(PxWindowsConsole* self, void* memory, pxiword amount, pxiword stride)
+pxWindowsConsoleRead(PxWindowsConsole* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    DWORD   temp   = 0;
-
     HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD  temp  = 0;
 
-    char* mem = pxCast(char*, memory);
-    int   len = pxCast(int,   length);
+    char* mem = px_as(char*, memory);
+    int   len = px_as(int,   length);
 
     pxb32 state = ReadFile(input, mem, len, &temp, 0);
 

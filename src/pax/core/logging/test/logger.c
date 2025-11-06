@@ -8,44 +8,48 @@ main(int argc, char** argv)
     PxArena arena = pxMemoryReserve(16);
 
     PxConsole console = pxConsoleCreate(&arena);
-    PxWriter  writer  = pxConsoleWriter(console, &arena, 1024);
+    PxTarget  target  = pxTargetFromConsole(console);
 
-    PxLogger logger = pxLoggerReserve(&arena, 1024, &writer);
+    PxLogger logger = pxLoggerMake(target, PX_REPORT_LEVEL_WARN,
+        PX_REPORT_FLAG_LEVEL | PX_REPORT_FLAG_COLOR);
 
-    pxLoggerSetFlags(&logger, PX_REPORT_FLAG_LEVEL | PX_REPORT_FLAG_COLOR);
-    pxLoggerSetLevel(&logger, PX_REPORT_LEVEL_WARN);
+    pxLoggerPrint(&logger, pxs8("Level is \"WARN\"\n\n"));
 
-    pxLoggerWrite(&logger, "Level is \"warn\"\n\n", (PxFormatCmd) {0});
+    pxLoggerFatal(&logger, pxs8("Testing...\n"));
+    pxLoggerError(&logger, pxs8("Testing...\n"));
+    pxLoggerWarn(&logger,  pxs8("Testing...\n"));
 
-    pxLoggerError(&logger, "IMPORTANT\n", (PxFormatCmd) {0});
+    pxLoggerInfoVargs(&logger, pxs8("With args [${0}, ${1}, ${2}, ${3}, ${4}, ${5}]\n"),
+        pxFormatMsgInteger(1), pxFormatMsgInteger(2), pxFormatMsgInteger(3),
+        pxFormatMsgInteger(4), pxFormatMsgInteger(5), pxFormatMsgInteger(6));
 
-    pxLoggerInfo(&logger, "With args [${0}, ${1}, ${2}, ${3}, ${4}, ${5}]\n",
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 1),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 2),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 3),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 4),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 5),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 6),
-    );
+    pxLoggerDebug(&logger, pxs8("Testing...\n"));
 
-    pxLoggerWarn(&logger, "No args\n", (PxFormatCmd) {0});
-    pxLoggerTrace(&logger, "No args\n", (PxFormatCmd) {0});
+    pxLoggerTraceFormat(&logger, pxs8("strings = str8(${0}), str16(${1}), str32(${2})\n"),
+        (PxFormatMsg[]) {
+            pxFormatMsgString8(pxString8Vargs('h', 'e', 'l', 'l', 'o')),
+            pxFormatMsgString16(pxString16Vargs('h', 'e', 'l', 'l', 'o')),
+            pxFormatMsgString32(pxString32Vargs('h', 'e', 'l', 'l', 'o')),
+        }, 3);
 
     pxLoggerSetLevel(&logger, PX_REPORT_LEVEL_TRACE);
 
-    pxLoggerWrite(&logger, "\nlevel is \"trace\"\n\n", (PxFormatCmd) {0});
+    pxLoggerPrint(&logger, pxs8("\nLevel is \"TRACE\"\n\n"));
 
-    pxLoggerError(&logger, "IMPORTANT\n", (PxFormatCmd) {0});
+    pxLoggerFatal(&logger, pxs8("Testing...\n"));
+    pxLoggerError(&logger, pxs8("Testing...\n"));
+    pxLoggerWarn(&logger,  pxs8("Testing...\n"));
 
-    pxLoggerInfo(&logger, "With args [${0}, ${1}, ${2}, ${3}, ${4}, ${5}]\n",
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 1),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 2),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 3),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 4),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 5),
-        pxFormatCmdInteger(10, PX_FORMAT_OPTION_NONE, 6),
-    );
+    pxLoggerInfoVargs(&logger, pxs8("With args [${0}, ${1}, ${2}, ${3}, ${4}, ${5}]\n"),
+        pxFormatMsgInteger(1), pxFormatMsgInteger(2), pxFormatMsgInteger(3),
+        pxFormatMsgInteger(4), pxFormatMsgInteger(5), pxFormatMsgInteger(6));
 
-    pxLoggerWarn(&logger, "No args\n", (PxFormatCmd) {0});
-    pxLoggerTrace(&logger, "No args\n", (PxFormatCmd) {0});
+    pxLoggerDebug(&logger, pxs8("Testing...\n"));
+
+    pxLoggerTraceFormat(&logger, pxs8("strings = str8(${0}), str16(${1}), str32(${2})\n"),
+        (PxFormatMsg[]) {
+            pxFormatMsgString8(pxString8Vargs('h', 'e', 'l', 'l', 'o')),
+            pxFormatMsgString16(pxString16Vargs('h', 'e', 'l', 'l', 'o')),
+            pxFormatMsgString32(pxString32Vargs('h', 'e', 'l', 'l', 'o')),
+        }, 3);
 }

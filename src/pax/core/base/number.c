@@ -7,52 +7,52 @@ pxu8
 pxMagnitudeInteger8(pxi8 value)
 {
     if (value < 0)
-        return -pxCast(pxu8, value);
+        return -px_as(pxu8, value);
 
-    return pxCast(pxu8, value);
+    return px_as(pxu8, value);
 }
 
 pxu16
 pxMagnitudeInteger16(pxi16 value)
 {
     if (value < 0)
-        return -pxCast(pxu16, value);
+        return -px_as(pxu16, value);
 
-    return pxCast(pxu16, value);
+    return px_as(pxu16, value);
 }
 
 pxu32
 pxMagnitudeInteger32(pxi32 value)
 {
     if (value < 0)
-        return -pxCast(pxu32, value);
+        return -px_as(pxu32, value);
 
-    return pxCast(pxu32, value);
+    return px_as(pxu32, value);
 }
 
 pxu64
 pxMagnitudeInteger64(pxi64 value)
 {
     if (value < 0)
-        return -pxCast(pxu64, value);
+        return -px_as(pxu64, value);
 
-    return pxCast(pxu64, value);
+    return px_as(pxu64, value);
 }
 
 pxuword
 pxMagnitudeInteger(pxiword value)
 {
     if (value < 0)
-        return -pxCast(pxuword, value);
+        return -px_as(pxuword, value);
 
-    return pxCast(pxuword, value);
+    return px_as(pxuword, value);
 }
 
 pxf32
 pxMagnitudeFloating32(pxf32 value)
 {
     pxu32* bits =
-        pxCast(pxu32*, &value);
+        px_as(pxu32*, &value);
 
     *bits &= ~PX_F32_SIGN_MASK;
 
@@ -63,7 +63,7 @@ pxf64
 pxMagnitudeFloating64(pxf64 value)
 {
     pxu64* bits =
-        pxCast(pxu64*, &value);
+        px_as(pxu64*, &value);
 
     *bits &= ~PX_F64_SIGN_MASK;
 
@@ -74,7 +74,7 @@ pxfword
 pxMagnitudeFloating(pxfword value)
 {
     pxuword* bits =
-        pxCast(pxuword*, &value);
+        px_as(pxuword*, &value);
 
     *bits &= ~PX_FWORD_SIGN_MASK;
 
@@ -84,41 +84,31 @@ pxMagnitudeFloating(pxfword value)
 pxi8
 pxDirectionUnsigned8(pxu8 value)
 {
-    if (value > 0) return +1;
-
-    return 0;
+    return value > 0 ? 1 : 0;
 }
 
 pxi8
 pxDirectionUnsigned16(pxu16 value)
 {
-    if (value > 0) return +1;
-
-    return 0;
+    return value > 0 ? 1 : 0;
 }
 
 pxi8
 pxDirectionUnsigned32(pxu32 value)
 {
-    if (value > 0) return +1;
-
-    return 0;
+    return value > 0 ? 1 : 0;
 }
 
 pxi8
 pxDirectionUnsigned64(pxu64 value)
 {
-    if (value > 0) return +1;
-
-    return 0;
+    return value > 0 ? 1 : 0;
 }
 
 pxi8
 pxDirectionUnsigned(pxuword value)
 {
-    if (value > 0) return +1;
-
-    return 0;
+    return value > 0 ? 1 : 0;
 }
 
 pxi8

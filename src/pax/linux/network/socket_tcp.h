@@ -6,33 +6,33 @@
 typedef struct PxLinuxSocketTcp PxLinuxSocketTcp;
 
 PxLinuxSocketTcp*
-pxLinuxSocketTcpCreate(PxArena* arena, PxAddressType type);
+pxLinuxSocketTcpCreate(PxArena* arena, PxAddrType type);
 
 void
 pxLinuxSocketTcpDestroy(PxLinuxSocketTcp* self);
 
-PxAddress
-pxLinuxSocketTcpGetAddress(PxLinuxSocketTcp* self);
+PxAddr
+pxLinuxSocketTcpGetAddr(PxLinuxSocketTcp* self);
 
 pxu16
 pxLinuxSocketTcpGetPort(PxLinuxSocketTcp* self);
 
 pxb8
-pxLinuxSocketTcpBind(PxLinuxSocketTcp* self, PxAddress address, pxu16 port);
+pxLinuxSocketTcpBind(PxLinuxSocketTcp* self, PxAddr addr, pxu16 port);
 
 pxb8
 pxLinuxSocketTcpListen(PxLinuxSocketTcp* self);
 
 pxb8
-pxLinuxSocketTcpConnect(PxLinuxSocketTcp* self, PxAddress address, pxu16 port);
+pxLinuxSocketTcpConnect(PxLinuxSocketTcp* self, PxAddr addr, pxu16 port);
 
 PxLinuxSocketTcp*
 pxLinuxSocketTcpAccept(PxLinuxSocketTcp* self, PxArena* arena);
 
 pxiword
-pxLinuxSocketTcpWriteMemory(PxLinuxSocketTcp* self, void* memory, pxiword amount, pxiword stride);
+pxLinuxSocketTcpWrite(PxLinuxSocketTcp* self, pxu8* memory, pxiword length);
 
 pxiword
-pxLinuxSocketTcpReadMemory(PxLinuxSocketTcp* self, void* memory, pxiword amount, pxiword stride);
+pxLinuxSocketTcpRead(PxLinuxSocketTcp* self, pxu8* memory, pxiword length);
 
 #endif // PX_LINUX_NETWORK_SOCKET_TCP_H

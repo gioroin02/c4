@@ -27,22 +27,12 @@ typedef enum PxJsonTokenType
 }
 PxJsonTokenType;
 
-typedef struct PxJsonTokenError
-{
-    PxString8 subject;
-    PxString8 content;
-}
-PxJsonTokenError;
-
 typedef struct PxJsonToken
 {
     PxJsonTokenType type;
-    pxiword         length;
 
     union
     {
-        PxJsonTokenError error;
-
         PxString8 string_8;
         pxuword   unsigned_word;
         pxiword   integer_word;
@@ -53,10 +43,10 @@ typedef struct PxJsonToken
 PxJsonToken;
 
 PxJsonToken
-pxJsonTokenNone();
+pxJsonTokenMake(PxJsonTokenType type);
 
 PxJsonToken
-pxJsonTokenError(PxString8 subject, PxString8 content);
+pxJsonTokenError();
 
 PxJsonToken
 pxJsonTokenObjectOpen();
@@ -80,42 +70,21 @@ PxJsonToken
 pxJsonTokenString(PxString8 string);
 
 PxJsonToken
-pxJsonTokenUnsigned(PxString8 string);
+pxJsonTokenUnsigned(pxuword value);
 
 PxJsonToken
-pxJsonTokenInteger(PxString8 string);
+pxJsonTokenInteger(pxiword value);
 
 PxJsonToken
-pxJsonTokenFloating(PxString8 string);
+pxJsonTokenFloating(pxfword value);
 
 PxJsonToken
-pxJsonTokenBoolean(PxString8 string, pxbword value);
+pxJsonTokenBoolean(pxbword value);
 
 PxJsonToken
-pxJsonTokenNull(PxString8 string);
+pxJsonTokenNull();
 
 PxJsonToken
 pxJsonTokenCount();
-
-PxJsonToken
-pxJsonPeek(PxReader* reader, PxArena* arena);
-
-PxJsonToken
-pxJsonPeekSymbol(PxReader* reader, PxArena* arena);
-
-PxJsonToken
-pxJsonPeekString(PxReader* reader, PxArena* arena);
-
-PxJsonToken
-pxJsonPeekNumber(PxReader* reader, PxArena* arena);
-
-PxJsonToken
-pxJsonPeekWord(PxReader* reader, PxArena* arena);
-
-PxJsonToken
-pxJsonNext(PxReader* reader, PxArena* arena);
-
-pxu8
-pxJsonSkipSpaces(PxReader* reader);
 
 #endif // PX_ENCODING_JSON_TOKEN_H

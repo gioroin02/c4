@@ -16,7 +16,7 @@ pxWindowsMemoryPageSize()
 
     GetSystemInfo(&info);
 
-    return pxCast(pxiword, info.dwPageSize);
+    return px_as(pxiword, info.dwPageSize);
 }
 
 PxArena
@@ -30,15 +30,12 @@ pxWindowsMemoryReserve(pxiword amount)
 
     pxiword length = amount * stride;
 
-    result = VirtualAlloc(0, pxCast(DWORD, length),
+    result = VirtualAlloc(0, px_as(DWORD, length),
         MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
     if (result == 0) return (PxArena) {0};
 
-    return (PxArena) {
-        .memory = result,
-        .length = amount * stride,
-    };
+    return pxArenaMake(result, length);
 }
 
 void

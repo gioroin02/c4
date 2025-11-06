@@ -3,61 +3,61 @@
 
 #include "import.h"
 
-#define PX_ESCAPE_GROUPS 8
-#define PX_ESCAPE_VALUES 8
+#define PX_CONSOLE_ESC_GROUPS px_as(pxiword, 5)
+#define PX_CONSOLE_ESC_VALUES px_as(pxiword, 5)
 
-typedef enum PxEscapeType
+typedef enum PxConsoleEscFlag
 {
-    PX_ESCAPE_NONE,
-
-    PX_ESCAPE_UNICODE,
-    PX_ESCAPE_FUNCTION,
-
-    PX_ESCAPE_GRAPHIC,
-
-    PX_ESCAPE_UP,
-    PX_ESCAPE_DOWN,
-    PX_ESCAPE_LEFT,
-    PX_ESCAPE_RIGHT,
-    PX_ESCAPE_HOME,
-    PX_ESCAPE_END,
+    PX_CONSOLE_ESC_FLAG_NONE = 0,
+    PX_CONSOLE_ESC_FLAG_CSI  = 1 << 0,
+    PX_CONSOLE_ESC_FLAG_PRIV = 1 << 1,
 }
-PxEscapeType;
+PxConsoleEscFlag;
 
-typedef struct PxEscapeGroup
+typedef struct PxConsoleEscGroup
 {
-    pxuword values[PX_ESCAPE_VALUES];
+    pxuword items[PX_CONSOLE_ESC_VALUES];
     pxiword size;
 }
-PxEscapeGroup;
+PxConsoleEscGroup;
 
-typedef struct PxEscape
+typedef struct PxConsoleEscSeqnc
 {
-    PxEscapeType  type;
-    PxEscapeGroup groups[PX_ESCAPE_GROUPS];
-    pxiword       size;
+    PxConsoleEscGroup items[PX_CONSOLE_ESC_GROUPS];
+    pxiword           size;
+
+    pxu8 func;
+
+    PxConsoleEscFlag flags;
 }
-PxEscape;
+PxConsoleEscSeqnc;
 
-PxEscapeType
-pxEscapeSetType(PxEscape* self, PxEscapeType value);
+/* Group */
 
-pxb8
-pxEscapeInsertGroupTail(PxEscape* self);
-
-pxb8
-pxEscapeInsertValueTail(PxEscape* self, pxiword group, pxuword value);
+PxConsoleEscGroup
+pxConsoleEscGroupMake(pxuword* values, pxiword length);
 
 pxb8
-pxEscapeReadValue(PxEscape* self, pxiword group, pxiword index, pxuword* value);
+pxConsoleEscGroupInsert(PxConsoleEscGroup* self, pxuword value);
+
+pxb8
+pxConsoleEscGroupFromString8(PxString8 string, PxConsoleEscGroup* value);
+
+/* Sequence */
+
+PxConsoleEscSeqnc
+pxConsoleEscSeqncMake(PxConsoleEscGroup* values, pxiword length);
+
+pxb8
+pxConsoleEscSeqncInsert(PxConsoleEscSeqnc* self, PxConsoleEscGroup value);
+
+pxb8
+pxConsoleEscSeqncGet(PxConsoleEscSeqnc* self, pxiword group, pxiword index, pxuword* value);
 
 pxuword
-pxEscapeReadValueOr(PxEscape* self, pxiword group, pxiword index, pxuword value);
+pxConsoleEscSeqncGetOr(PxConsoleEscSeqnc* self, pxiword group, pxiword index, pxuword value);
 
 pxb8
-pxEscapeFromString8(PxEscape* self, PxString8 string, pxiword* size);
-
-pxb8
-pxEscapeGroupFromString8(PxEscape* self, PxString8 string);
+pxConsoleEscSeqncFromString8(PxString8 string, PxConsoleEscSeqnc* value);
 
 #endif // PX_CORE_CONSOLE_ESCAPE_H

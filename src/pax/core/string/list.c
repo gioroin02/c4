@@ -340,10 +340,10 @@ pxString16FromStringList(PxArena* arena, PxStringList* value, PxString16 pivot, 
         while (other < node->length) {
             pxi32 unicode = 0;
 
-            other += pxUtf8ReadMemory8Forw(
-                node->memory, node->length, other, &unicode);
+            other += pxUtf8ReadForw(node->memory, node->length,
+                other, &unicode);
 
-            index += pxUtf16WriteMemory16Forw(
+            index += pxUtf16WriteForw(
                 result, length, index, unicode);
         }
 
@@ -394,10 +394,10 @@ pxString32FromStringList(PxArena* arena, PxStringList* value, PxString32 pivot, 
         while (other < node->length) {
             pxi32 unicode = 0;
 
-            other += pxUtf8ReadMemory8Forw(
-                node->memory, node->length, other, &unicode);
+            other += pxUtf8ReadForw(node->memory, node->length,
+                other, &unicode);
 
-            index += pxUtf32WriteMemory32Forw(
+            index += pxUtf32WriteForw(
                 result, length, index, unicode);
         }
 

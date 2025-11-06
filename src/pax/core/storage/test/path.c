@@ -11,7 +11,7 @@ main(int argc, char** argv)
 
     for (PxPathNode* n = path.head; n != 0; n = n->next) {
         for (pxiword i = 0; i < n->length; i += 1)
-            printf("%c", pxCast(pxi8, n->memory[i]));
+            printf("%c", px_as(pxi8, n->memory[i]));
 
         if (n->next != 0)
             printf(" - ");

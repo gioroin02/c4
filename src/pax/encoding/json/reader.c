@@ -4,7 +4,7 @@
 #include "reader.h"
 
 PxJsonReader
-pxJsonReaderMake(PxArena* arena, pxiword length, PxReader* reader)
+pxJsonReaderReserve(PxSource source, PxArena* arena, pxiword length)
 {
     PxQueue stack =
         pxQueueReserve(arena, PxJsonLayerType, length);
@@ -12,29 +12,33 @@ pxJsonReaderMake(PxArena* arena, pxiword length, PxReader* reader)
     if (stack.length <= 0) return (PxJsonReader) {0};
 
     return (PxJsonReader) {
-        .reader = reader,
+        .source = source,
         .stack  = stack,
     };
 }
 
 PxJsonMsg
-pxJsonReadMessage(PxJsonReader* self, PxArena* arena)
+pxJsonReaderMsg(PxJsonReader* self, PxArena* arena)
 {
-    PxJsonMsg     result = pxJsonMsgCount();
+    PxJsonMsg       result = pxJsonMsgCount();
     PxJsonLayerType parent = PX_JSON_LAYER_NONE;
 
     while (result.type == PX_JSON_MSG_COUNT) {
-        if (pxQueueReadTail(&self->stack, PxJsonLayerType, &parent) == 0)
+        if (pxQueueGetTail(&self->stack, PxJsonLayerType, &parent) == 0)
             parent = PX_JSON_LAYER_NONE;
 
-        PxJsonToken token = pxJsonNext(self->reader, arena);
+        PxJsonToken token = self->token;
+
+        if (token.type == PX_JSON_TOKEN_NONE)
+            token = pxSourceReadJsonToken(self->source, arena);
+        else
+            self->token = (PxJsonToken) {0};
 
         if (token.type == PX_JSON_TOKEN_COUNT) break;
 
         switch (token.type) {
             case PX_JSON_TOKEN_ERROR: {
-                result = pxJsonMsgError(token.error.subject,
-                    token.error.content);
+                result = pxJsonMsgError();
             } break;
 
             case PX_JSON_TOKEN_OBJECT_OPEN: {
@@ -42,12 +46,12 @@ pxJsonReadMessage(PxJsonReader* self, PxArena* arena)
 
                 PxJsonLayerType layer = PX_JSON_LAYER_OBJECT;
 
-                pxQueueInsertTail(&self->stack, PxJsonLayerType,
-                    &layer);
+                pxQueueInsertTail(&self->stack,
+                    PxJsonLayerType, &layer);
 
-                self->name  = (PxString8) {0};
-                self->colon = 0;
-                self->comma = 0;
+                self->name   = pxString8Make(0, 0);
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_OBJECT_CLOSE: {
@@ -55,9 +59,9 @@ pxJsonReadMessage(PxJsonReader* self, PxArena* arena)
 
                 pxQueueDropTail(&self->stack);
 
-                self->name  = (PxString8) {0};
-                self->colon = 0;
-                self->comma = 0;
+                self->name   = pxString8Make(0, 0);
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_ARRAY_OPEN: {
@@ -65,12 +69,12 @@ pxJsonReadMessage(PxJsonReader* self, PxArena* arena)
 
                 PxJsonLayerType layer = PX_JSON_LAYER_ARRAY;
 
-                pxQueueInsertTail(&self->stack, PxJsonLayerType,
-                    &layer);
+                pxQueueInsertTail(&self->stack,
+                    PxJsonLayerType, &layer);
 
-                self->name  = (PxString8) {0};
-                self->colon = 0;
-                self->comma = 0;
+                self->name   = pxString8Make(0, 0);
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_ARRAY_CLOSE: {
@@ -78,16 +82,16 @@ pxJsonReadMessage(PxJsonReader* self, PxArena* arena)
 
                 pxQueueDropTail(&self->stack);
 
-                self->name  = (PxString8) {0};
-                self->colon = 0;
-                self->comma = 0;
+                self->name   = pxString8Make(0, 0);
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_COLON: {
                 if (parent == PX_JSON_LAYER_OBJECT) {
-                    token = pxJsonPeek(self->reader, arena);
+                    self->token = pxSourceReadJsonToken(self->source, arena);
 
-                    switch (token.type) {
+                    switch (self->token.type) {
                         case PX_JSON_TOKEN_OBJECT_OPEN:
                         case PX_JSON_TOKEN_ARRAY_OPEN:
                             result = pxJsonMsgName(self->name);
@@ -97,79 +101,137 @@ pxJsonReadMessage(PxJsonReader* self, PxArena* arena)
                     }
                 }
 
-                self->colon = 1;
-                self->comma = 0;
+                self->flags |=  PX_JSON_READER_COLON;
+                self->flags &= ~PX_JSON_READER_COMMA;
             } break;
 
             case PX_JSON_TOKEN_COMMA: {
-                self->name  = (PxString8) {0};
-                self->colon = 0;
-                self->comma = 1;
+                self->name   = pxString8Make(0, 0);
+                self->flags &= ~PX_JSON_READER_COLON;
+                self->flags |=  PX_JSON_READER_COMMA;
             } break;
 
             case PX_JSON_TOKEN_STRING: {
-                if (parent != PX_JSON_LAYER_OBJECT || self->colon != 0) {
-                    result = pxJsonMsgString(
-                        token.string_8, self->name);
+                pxb8 colon = (self->flags & PX_JSON_READER_COLON) != 0;
+
+                if (parent != PX_JSON_LAYER_OBJECT || colon != 0) {
+                    result = pxJsonMsgString(token.string_8);
+
+                    if (self->name.length > 0)
+                        result = pxJsonMsgPair(self->name, result);
                 } else
                     self->name = token.string_8;
 
-                self->colon = 0;
-                self->comma = 0;
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_UNSIGNED: {
-                result = pxJsonMsgUnsigned(
-                    token.unsigned_word, self->name);
+                result = pxJsonMsgUnsigned(token.unsigned_word);
 
-                self->colon = 0;
-                self->comma = 0;
+                if (self->name.length > 0)
+                    result = pxJsonMsgPair(self->name, result);
+
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_INTEGER: {
-                result = pxJsonMsgInteger(
-                    token.integer_word, self->name);
+                result = pxJsonMsgInteger(token.integer_word);
 
-                self->colon = 0;
-                self->comma = 0;
+                if (self->name.length > 0)
+                    result = pxJsonMsgPair(self->name, result);
+
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_FLOATING: {
-                result = pxJsonMsgFloating(
-                    token.floating_word, self->name);
+                result = pxJsonMsgFloating(token.floating_word);
 
-                self->colon = 0;
-                self->comma = 0;
+                if (self->name.length > 0)
+                    result = pxJsonMsgPair(self->name, result);
+
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_BOOLEAN: {
-                result = pxJsonMsgBoolean(
-                    token.boolean_word, self->name);
+                result = pxJsonMsgBoolean(token.boolean_word);
 
-                self->colon = 0;
-                self->comma = 0;
+                if (self->name.length > 0)
+                    result = pxJsonMsgPair(self->name, result);
+
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             case PX_JSON_TOKEN_NULL: {
-                result = pxJsonMsgNull(self->name);
+                result = pxJsonMsgNull();
 
-                self->colon = 0;
-                self->comma = 0;
+                if (self->name.length > 0)
+                    result = pxJsonMsgPair(self->name, result);
+
+                self->flags &= ~PX_JSON_READER_COMMA;
+                self->flags &= ~PX_JSON_READER_COLON;
             } break;
 
             default: break;
         }
     }
 
+    if (result.name.length > 0) self->name = pxString8Make(0, 0);
+
     return result;
 }
 
 pxb8
-pxJsonExpectMessage(PxJsonReader* self, PxArena* arena, PxJsonMsgType type)
+pxJsonReaderObjectOpen(PxJsonReader* self, PxArena* arena, PxJsonMsg* message)
 {
-    PxJsonMsg result = pxJsonReadMessage(self, arena);
+    if (message == 0) return 0;
 
-    if (result.type != type)
+    *message = pxJsonReaderMsg(self, arena);
+
+    if (message->type != PX_JSON_MSG_OBJECT_OPEN)
+        return 0;
+
+    return 1;
+}
+
+pxb8
+pxJsonReaderObjectClose(PxJsonReader* self, PxArena* arena, PxJsonMsg* message)
+{
+    if (message == 0) return 0;
+
+    *message = pxJsonReaderMsg(self, arena);
+
+    if (message->type != PX_JSON_MSG_OBJECT_CLOSE)
+        return 0;
+
+    return 1;
+}
+
+pxb8
+pxJsonReaderArrayOpen(PxJsonReader* self, PxArena* arena, PxJsonMsg* message)
+{
+    if (message == 0) return 0;
+
+    *message = pxJsonReaderMsg(self, arena);
+
+    if (message->type != PX_JSON_MSG_ARRAY_OPEN)
+        return 0;
+
+    return 1;
+}
+
+pxb8
+pxJsonReaderArrayClose(PxJsonReader* self, PxArena* arena, PxJsonMsg* message)
+{
+    if (message == 0) return 0;
+
+    *message = pxJsonReaderMsg(self, arena);
+
+    if (message->type != PX_JSON_MSG_ARRAY_CLOSE)
         return 0;
 
     return 1;

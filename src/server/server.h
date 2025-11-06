@@ -3,8 +3,6 @@
 
 #include "import.h"
 
-extern PxLogger* LOGGER;
-
 typedef struct C4Server
 {
     PxSocketTcp socket;
@@ -15,6 +13,7 @@ C4Server;
 typedef struct C4Session
 {
     PxSocketTcp socket;
+
     PxReader    reader;
     PxWriter    writer;
 }
@@ -25,6 +24,9 @@ c4ServerMake(PxArena* arena, pxiword length, PxAddressType type);
 
 pxb8
 c4ServerStart(C4Server* self, PxAddress address, pxu16 port);
+
+void
+c4ServerClose(C4Server* self);
 
 void
 c4ServerStop(C4Server* self);

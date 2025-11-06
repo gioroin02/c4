@@ -27,15 +27,12 @@ void
 pxWindowsFileClose(PxWindowsFile* self);
 
 pxb8
-pxWindowsFileDestroy(PxWindowsFile* self, PxArena* arena);
-
-pxb8
-pxWindowsFileDelete(PxArena* arena, PxString8 base, PxString8 name);
+pxWindowsFileDestroy(PxArena* arena, PxString8 base, PxString8 name);
 
 pxiword
-pxWindowsFileWriteMemory(PxWindowsFile* self, void* memory, pxiword amount, pxiword stride);
+pxWindowsFileWrite(PxWindowsFile* self, pxu8* memory, pxiword length);
 
 pxiword
-pxWindowsFileReadMemory(PxWindowsFile* self, void* memory, pxiword amount, pxiword stride);
+pxWindowsFileRead(PxWindowsFile* self, pxu8* memory, pxiword length);
 
 #endif // PX_WINDOWS_STORAGE_FILE_H

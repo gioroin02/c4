@@ -1,7 +1,10 @@
-#ifndef PX_CORE_STRING_STRING32_H
-#define PX_CORE_STRING_STRING32_H
+#ifndef PX_CORE_STRING_STRING_32_H
+#define PX_CORE_STRING_STRING_32_H
 
-#include "utf32.h"
+#include "unicode.h"
+
+#define pxString32Vargs(x, ...) \
+    (PxString32) {px_array_from_vargs(pxu32, x, __VA_ARGS__), px_size_vargs(pxu32, x, __VA_ARGS__)}
 
 typedef struct PxString32
 {
@@ -121,4 +124,4 @@ pxString32Next(PxString32 self, pxiword index, pxiword* units, pxi32* value);
 pxb8
 pxString32Prev(PxString32 self, pxiword index, pxiword* units, pxi32* value);
 
-#endif // PX_CORE_STRING_STRING32_H
+#endif // PX_CORE_STRING_STRING_32_H

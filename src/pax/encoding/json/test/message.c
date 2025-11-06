@@ -3,121 +3,111 @@
 
 #include <stdio.h>
 
-#define COLOR_RESET "\x1b[0m"
-
-#define FRONT_RED    "\x1b[31m"
-#define FRONT_GREEN  "\x1b[32m"
-#define FRONT_YELLOW "\x1b[33m"
-#define FRONT_BLUE   "\x1b[34m"
-#define FRONT_PURPLE "\x1b[35m"
-#define FRONT_AZURE  "\x1b[36m"
-
-#define RED(expr)    FRONT_RED    expr COLOR_RESET
-#define GREEN(expr)  FRONT_GREEN  expr COLOR_RESET
-#define YELLOW(expr) FRONT_YELLOW expr COLOR_RESET
-#define BLUE(expr)   FRONT_BLUE   expr COLOR_RESET
-#define PURPLE(expr) FRONT_PURPLE expr COLOR_RESET
-#define AZURE(expr)  FRONT_AZURE  expr COLOR_RESET
+#define RED(x) "\x1b[91m" x "\x1b[0m"
+#define GRN(x) "\x1b[92m" x "\x1b[0m"
+#define YLW(x) "\x1b[93m" x "\x1b[0m"
+#define BLU(x) "\x1b[94m" x "\x1b[0m"
+#define MAG(x) "\x1b[95m" x "\x1b[0m"
+#define CYA(x) "\x1b[96m" x "\x1b[0m"
 
 #define ENTITY \
-    pxs8("{ \"flags\": [16, 32], \"code\": 156, \"name\": \"player\", \"coords\": {\"x\": -1, \"y\": +2, \"z\": null}, \"alive\": true, \"pause\": false }")
+    pxs8("{\n\t\"flags\": [16, 32],\n\t\"code\": 156,\n\t\"name\": \"player\",\n\t\"coords\": {\"x\": -1, \"y\": +2, \"z\": null},\n\t\"alive\": true,\n\t\"pause\": false\n}")
 
 void
 showJsonMsg(PxJsonReader* reader, PxArena* arena)
 {
-    PxJsonMsg message = pxJsonMsgNone();
+    PxJsonMsg message = {0};
 
     while (message.type != PX_JSON_MSG_COUNT) {
-        message = pxJsonReadMessage(reader, arena);
+        pxiword offset = pxArenaOffset(arena);
+
+        message = pxJsonReaderMsg(reader, arena);
 
         if (message.type == PX_JSON_MSG_COUNT) break;
 
+        printf("[%4lli] ", offset);
+
         switch (message.type) {
             case PX_JSON_MSG_ERROR: {
-                PxString8 content = message.error.content;
-                PxString8 subject = message.error.subject;
-
-                printf(RED("%.*s: %.*s"),
-                    pxCast(int, content.length), content.memory,
-                    pxCast(int, subject.length), subject.memory);
+                printf(RED("ERROR"));
 
                 message.type = PX_JSON_MSG_COUNT;
             } break;
 
             case PX_JSON_MSG_OBJECT_OPEN:
-                printf("OBJECT_OPEN");
+                printf("{");
             break;
 
             case PX_JSON_MSG_OBJECT_CLOSE:
-                printf("OBJECT_CLOSE");
+                printf("}");
             break;
 
             case PX_JSON_MSG_ARRAY_OPEN:
-                printf("ARRAY_OPEN");
+                printf("[");
             break;
 
             case PX_JSON_MSG_ARRAY_CLOSE:
-                printf("ARRAY_CLOSE");
+                printf("]");
             break;
 
             case PX_JSON_MSG_NAME:
-                printf(AZURE("%.*s"), pxCast(int, message.name.length),
+                printf(CYA("'%.*s'"), px_as(int, message.name.length),
                     message.name.memory);
             break;
 
             case PX_JSON_MSG_STRING: {
                 if (message.name.length > 0) {
-                    printf(AZURE("'%.*s'") ": ", pxCast(int, message.name.length),
+                    printf(CYA("'%.*s'") ": ", px_as(int, message.name.length),
                         message.name.memory);
                 }
 
-                printf(BLUE("'%.*s'"),
-                    pxCast(int, message.string_8.length), message.string_8.memory);
+                printf(BLU("'%.*s'"),
+                    px_as(int, message.string_8.length), message.string_8.memory);
             } break;
 
             case PX_JSON_MSG_UNSIGNED: {
                 if (message.name.length > 0) {
-                    printf(AZURE("'%.*s'") ": ", pxCast(int, message.name.length),
+                    printf(CYA("'%.*s'") ": ", px_as(int, message.name.length),
                         message.name.memory);
                 }
 
-                printf(PURPLE("%llu"), message.unsigned_word);
+                printf(MAG("%llu"), message.unsigned_word);
             } break;
 
             case PX_JSON_MSG_INTEGER: {
                 if (message.name.length > 0) {
-                    printf(AZURE("'%.*s'") ": ", pxCast(int, message.name.length),
+                    printf(CYA("'%.*s'") ": ", px_as(int, message.name.length),
                         message.name.memory);
                 }
 
-                printf(PURPLE("%lli"), message.integer_word);
+                printf(MAG("%lli"), message.integer_word);
             } break;
 
             case PX_JSON_MSG_FLOATING: {
                 if (message.name.length > 0) {
-                    printf(AZURE("'%.*s'") ": ", pxCast(int, message.name.length),
+                    printf(CYA("'%.*s'") ": ", px_as(int, message.name.length),
                         message.name.memory);
                 }
 
-                printf(PURPLE("%lf"), message.floating_word);
+                printf(MAG("%lf"), message.floating_word);
             } break;
 
             case PX_JSON_MSG_BOOLEAN: {
                 if (message.name.length > 0) {
-                    printf(AZURE("'%.*s'") ": ", pxCast(int, message.name.length),
+                    printf(CYA("'%.*s'") ": ", px_as(int, message.name.length),
                         message.name.memory);
                 }
 
-                printf("%s", message.boolean_word != 0 ? GREEN("true") : RED("false"));
+                printf("%s", message.boolean_word != 0 ? GRN("true") : RED("false"));
             } break;
 
             case PX_JSON_MSG_NULL: {
                 if (message.name.length > 0) {
-                    printf(AZURE("'%.*s'") ": ", pxCast(int, message.name.length),
+                    printf(CYA("'%.*s'") ": ", px_as(int, message.name.length),
                         message.name.memory);
                 }
 
-                printf(PURPLE("null"));
+                printf(YLW("null"));
             } break;
 
             default: break;
@@ -130,19 +120,21 @@ showJsonMsg(PxJsonReader* reader, PxArena* arena)
 int
 main(int argc, char** argv)
 {
-    PxArena   arena       = pxMemoryReserve(16);
-    PxBuffer8 source      = pxBuffer8Reserve(&arena, 256);
-    PxReader  buff_reader = pxBufferReader(&source, &arena, 256);
+    PxArena   arena = pxMemoryReserve(16);
+    PxBuffer8 items = pxBuffer8Reserve(&arena, 256);
 
-    pxBuffer8WriteString8Tail(&source, ENTITY);
+    PxBuffer8 buffer = pxBuffer8Reserve(&arena, 256);
 
-    printf(YELLOW("[start]") "\n%.*s\n" YELLOW("[stop]") "\n",
-        pxCast(int, source.size), source.memory);
+    PxSource source = pxBufferedSource(pxSourceFromBuffer8(&items), &buffer);
+
+    pxBuffer8WriteString8Tail(&items, ENTITY);
+
+    printf(YLW("[start]") "\n%.*s\n" YLW("[stop]") "\n",
+        px_as(int, items.size), items.memory);
 
     printf("\n");
 
-    PxJsonReader reader =
-        pxJsonReaderMake(&arena, 16, &buff_reader);
+    PxJsonReader reader = pxJsonReaderReserve(source, &arena, 16);
 
     showJsonMsg(&reader, &arena);
 }

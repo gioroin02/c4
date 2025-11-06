@@ -7,31 +7,31 @@
 
     #include "../../windows/network/socket_tcp.c"
 
-    #define __pxSocketTcpCreate__      pxWindowsSocketTcpCreate
-    #define __pxSocketTcpDestroy__     pxWindowsSocketTcpDestroy
-    #define __pxSocketTcpGetAddress__  pxWindowsSocketTcpGetAddress
-    #define __pxSocketTcpGetPort__     pxWindowsSocketTcpGetPort
-    #define __pxSocketTcpBind__        pxWindowsSocketTcpBind
-    #define __pxSocketTcpListen__      pxWindowsSocketTcpListen
-    #define __pxSocketTcpConnect__     pxWindowsSocketTcpConnect
-    #define __pxSocketTcpAccept__      pxWindowsSocketTcpAccept
-    #define __pxSocketTcpWriteMemory__ pxWindowsSocketTcpWriteMemory
-    #define __pxSocketTcpReadMemory__  pxWindowsSocketTcpReadMemory
+    #define __pxSocketTcpCreate__  pxWindowsSocketTcpCreate
+    #define __pxSocketTcpDestroy__ pxWindowsSocketTcpDestroy
+    #define __pxSocketTcpGetAddr__ pxWindowsSocketTcpGetAddr
+    #define __pxSocketTcpGetPort__ pxWindowsSocketTcpGetPort
+    #define __pxSocketTcpBind__    pxWindowsSocketTcpBind
+    #define __pxSocketTcpListen__  pxWindowsSocketTcpListen
+    #define __pxSocketTcpConnect__ pxWindowsSocketTcpConnect
+    #define __pxSocketTcpAccept__  pxWindowsSocketTcpAccept
+    #define __pxSocketTcpWrite__   pxWindowsSocketTcpWrite
+    #define __pxSocketTcpRead__    pxWindowsSocketTcpRead
 
 #elif PX_SYSTEM == PX_SYSTEM_LINUX
 
     #include "../../linux/network/socket_tcp.c"
 
-    #define __pxSocketTcpCreate__      pxLinuxSocketTcpCreate
-    #define __pxSocketTcpDestroy__     pxLinuxSocketTcpDestroy
-    #define __pxSocketTcpGetAddress__  pxLinuxSocketTcpGetAddress
-    #define __pxSocketTcpGetPort__     pxLinuxSocketTcpGetPort
-    #define __pxSocketTcpBind__        pxLinuxSocketTcpBind
-    #define __pxSocketTcpListen__      pxLinuxSocketTcpListen
-    #define __pxSocketTcpConnect__     pxLinuxSocketTcpConnect
-    #define __pxSocketTcpAccept__      pxLinuxSocketTcpAccept
-    #define __pxSocketTcpWriteMemory__ pxLinuxSocketTcpWriteMemory
-    #define __pxSocketTcpReadMemory__  pxLinuxSocketTcpReadMemory
+    #define __pxSocketTcpCreate__  pxLinuxSocketTcpCreate
+    #define __pxSocketTcpDestroy__ pxLinuxSocketTcpDestroy
+    #define __pxSocketTcpGetAddr__ pxLinuxSocketTcpGetAddr
+    #define __pxSocketTcpGetPort__ pxLinuxSocketTcpGetPort
+    #define __pxSocketTcpBind__    pxLinuxSocketTcpBind
+    #define __pxSocketTcpListen__  pxLinuxSocketTcpListen
+    #define __pxSocketTcpConnect__ pxLinuxSocketTcpConnect
+    #define __pxSocketTcpAccept__  pxLinuxSocketTcpAccept
+    #define __pxSocketTcpWrite__   pxLinuxSocketTcpWrite
+    #define __pxSocketTcpRead__    pxLinuxSocketTcpRead
 
 #else
 
@@ -40,7 +40,7 @@
 #endif
 
 PxSocketTcp
-pxSocketTcpCreate(PxArena* arena, PxAddressType type)
+pxSocketTcpCreate(PxArena* arena, PxAddrType type)
 {
     return __pxSocketTcpCreate__(arena, type);
 }
@@ -51,10 +51,10 @@ pxSocketTcpDestroy(PxSocketTcp self)
     __pxSocketTcpDestroy__(self);
 }
 
-PxAddress
-pxSocketTcpGetAddress(PxSocketTcp self)
+PxAddr
+pxSocketTcpGetAddr(PxSocketTcp self)
 {
-    return __pxSocketTcpGetAddress__(self);
+    return __pxSocketTcpGetAddr__(self);
 }
 
 pxu16
@@ -64,9 +64,9 @@ pxSocketTcpGetPort(PxSocketTcp self)
 }
 
 pxb8
-pxSocketTcpBind(PxSocketTcp self, PxAddress address, pxu16 port)
+pxSocketTcpBind(PxSocketTcp self, PxAddr addr, pxu16 port)
 {
-    return __pxSocketTcpBind__(self, address, port);
+    return __pxSocketTcpBind__(self, addr, port);
 }
 
 pxb8
@@ -76,9 +76,9 @@ pxSocketTcpListen(PxSocketTcp self)
 }
 
 pxb8
-pxSocketTcpConnect(PxSocketTcp self, PxAddress address, pxu16 port)
+pxSocketTcpConnect(PxSocketTcp self, PxAddr addr, pxu16 port)
 {
-    return __pxSocketTcpConnect__(self, address, port);
+    return __pxSocketTcpConnect__(self, addr, port);
 }
 
 PxSocketTcp
@@ -88,83 +88,39 @@ pxSocketTcpAccept(PxSocketTcp self, PxArena* arena)
 }
 
 pxiword
-pxSocketTcpWrite(PxSocketTcp self, PxBuffer8* buffer)
+pxSocketTcpWrite(PxSocketTcp self, pxu8* memory, pxiword length)
 {
-    pxBuffer8Normalize(buffer);
-
-    pxu8*   memory = buffer->memory;
-    pxiword size   = buffer->size;
-
-    if (size <= 0) return 0;
-
-    pxiword temp = pxSocketTcpWriteMemory(self, memory, size, 1);
-
-    buffer->size -= temp;
-    buffer->head  = (buffer->head + temp) % buffer->length;
-
-    return temp;
+    return __pxSocketTcpWrite__(self, memory, length);
 }
 
 pxiword
-pxSocketTcpWriteMemory(PxSocketTcp self, void* memory, pxiword amount, pxiword stride)
+pxSocketTcpRead(PxSocketTcp self, pxu8* memory, pxiword length)
 {
-    return __pxSocketTcpWriteMemory__(self, memory, amount, stride);
+    return __pxSocketTcpRead__(self, memory, length);
 }
 
-pxiword
-pxSocketTcpRead(PxSocketTcp self, PxBuffer8* buffer)
+PxSource
+pxSourceFromSocketTcp(PxSocketTcp self)
 {
-    pxBuffer8Normalize(buffer);
+    PxSource result = {0};
 
-    pxu8*   memory = buffer->memory + buffer->size;
-    pxiword size   = buffer->length - buffer->size;
+    if (self == 0) return result;
 
-    if (size <= 0) return 0;
-
-    pxiword temp = pxSocketTcpReadMemory(self, memory, size, 1);
-
-    buffer->size += temp;
-    buffer->tail  = (buffer->tail + temp) % buffer->length;
-
-    return temp;
-}
-
-pxiword
-pxSocketTcpReadMemory(PxSocketTcp self, void* memory, pxiword amount, pxiword stride)
-{
-    return __pxSocketTcpReadMemory__(self, memory, amount, stride);
-}
-
-PxWriter
-pxSocketTcpWriter(PxSocketTcp self, PxArena* arena, pxiword length)
-{
-    PxWriter result = {0};
-
-    if (self == 0 || length <= 0) return result;
-
-    result.buffer = pxBuffer8Reserve(arena, length);
-
-    if (result.buffer.length > 0) {
-        result.ctxt = self;
-        result.proc = &pxSocketTcpWrite;
-    }
+    result.ctxt = self;
+    result.proc = &pxSocketTcpRead;
 
     return result;
 }
 
-PxReader
-pxSocketTcpReader(PxSocketTcp self, PxArena* arena, pxiword length)
+PxTarget
+pxTargetFromSocketTcp(PxSocketTcp self)
 {
-    PxReader result = {0};
+    PxTarget result = {0};
 
-    if (self == 0 || length <= 0) return result;
+    if (self == 0) return result;
 
-    result.buffer = pxBuffer8Reserve(arena, length);
-
-    if (result.buffer.length > 0) {
-        result.ctxt = self;
-        result.proc = &pxSocketTcpRead;
-    }
+    result.ctxt = self;
+    result.proc = &pxSocketTcpWrite;
 
     return result;
 }

@@ -8,29 +8,29 @@ typedef char          pxi8;
 typedef unsigned char pxu8;
 typedef unsigned char pxb8;
 
-#define PX_I8_SIZE pxSize(pxi8)
-#define PX_I8_MAX  pxCast(pxi8, 0x7f)
-#define PX_I8_MIN  pxCast(pxi8, 0x80)
+#define PX_I8_SIZE px_size(pxi8)
+#define PX_I8_MAX  px_as(pxi8, 0x7f)
+#define PX_I8_MIN  px_as(pxi8, 0x80)
 
-#define PX_U8_SIZE pxSize(pxu8)
-#define PX_U8_MAX  pxCast(pxu8, 0xff)
-#define PX_U8_MIN  pxCast(pxu8, 0x00)
+#define PX_U8_SIZE px_size(pxu8)
+#define PX_U8_MAX  px_as(pxu8, 0xff)
+#define PX_U8_MIN  px_as(pxu8, 0x00)
 
-#define PX_B8_SIZE pxSize(pxb8)
+#define PX_B8_SIZE px_size(pxb8)
 
 typedef short          pxi16;
 typedef unsigned short pxu16;
 typedef unsigned short pxb16;
 
-#define PX_I16_SIZE pxSize(pxi16)
-#define PX_I16_MAX  pxCast(pxi16, 0x7fff)
-#define PX_I16_MIN  pxCast(pxi16, 0x8000)
+#define PX_I16_SIZE px_size(pxi16)
+#define PX_I16_MAX  px_as(pxi16, 0x7fff)
+#define PX_I16_MIN  px_as(pxi16, 0x8000)
 
-#define PX_U16_SIZE pxSize(pxu16)
-#define PX_U16_MAX  pxCast(pxu16, 0xffff)
-#define PX_U16_MIN  pxCast(pxu16, 0x0000)
+#define PX_U16_SIZE px_size(pxu16)
+#define PX_U16_MAX  px_as(pxu16, 0xffff)
+#define PX_U16_MIN  px_as(pxu16, 0x0000)
 
-#define PX_B16_SIZE pxSize(pxb16)
+#define PX_B16_SIZE px_size(pxb16)
 
 #if PX_WORD >= PX_WORD_32
 
@@ -39,29 +39,29 @@ typedef unsigned short pxb16;
     typedef unsigned long pxb32;
     typedef float         pxf32;
 
-    #define PX_I32_SIZE pxSize(pxi32)
-    #define PX_I32_MAX  pxCast(pxi32, 0x7fffffff)
-    #define PX_I32_MIN  pxCast(pxi32, 0x80000000)
+    #define PX_I32_SIZE px_size(pxi32)
+    #define PX_I32_MAX  px_as(pxi32, 0x7fffffff)
+    #define PX_I32_MIN  px_as(pxi32, 0x80000000)
 
-    #define PX_U32_SIZE pxSize(pxu32)
-    #define PX_U32_MAX  pxCast(pxu32, 0xffffffff)
-    #define PX_U32_MIN  pxCast(pxu32, 0x00000000)
+    #define PX_U32_SIZE px_size(pxu32)
+    #define PX_U32_MAX  px_as(pxu32, 0xffffffff)
+    #define PX_U32_MIN  px_as(pxu32, 0x00000000)
 
-    #define PX_B32_SIZE pxSize(pxb32)
+    #define PX_B32_SIZE px_size(pxb32)
 
-    #define PX_F32_SIZE pxSize(pxf32)
+    #define PX_F32_SIZE px_size(pxf32)
 
-    #define PX_F32_EXP_MAX  pxCast(pxi16, 127)
-    #define PX_F32_EXP_MIN  pxCast(pxi16, -126)
-    #define PX_F32_EXP_BIAS pxCast(pxi16, 127)
-    #define PX_F32_EXP_SIZE pxCast(pxi32, 8)
-    #define PX_F32_EXP_MASK pxCast(pxu32, 0x7f800000)
+    #define PX_F32_EXP_MAX  px_as(pxi16, 127)
+    #define PX_F32_EXP_MIN  px_as(pxi16, -126)
+    #define PX_F32_EXP_BIAS px_as(pxi16, 127)
+    #define PX_F32_EXP_SIZE px_as(pxi32, 8)
+    #define PX_F32_EXP_MASK px_as(pxu32, 0x7f800000)
 
-    #define PX_F32_FRAC_SIZE pxCast(pxi32, 23)
-    #define PX_F32_FRAC_MASK pxCast(pxu32, 0x007fffff)
+    #define PX_F32_FRAC_SIZE px_as(pxi32, 23)
+    #define PX_F32_FRAC_MASK px_as(pxu32, 0x007fffff)
 
-    #define PX_F32_SIGN_SIZE pxCast(pxi32, 1)
-    #define PX_F32_SIGN_MASK pxCast(pxu32, 0x80000000)
+    #define PX_F32_SIGN_SIZE px_as(pxi32, 1)
+    #define PX_F32_SIGN_MASK px_as(pxu32, 0x80000000)
 
 #endif
 
@@ -72,29 +72,29 @@ typedef unsigned short pxb16;
     typedef unsigned long long pxb64;
     typedef double             pxf64;
 
-    #define PX_I64_SIZE pxSize(pxi64)
-    #define PX_I64_MAX  pxCast(pxi64, 0x7fffffffffffffff)
-    #define PX_I64_MIN  pxCast(pxi64, 0x8000000000000000)
+    #define PX_I64_SIZE px_size(pxi64)
+    #define PX_I64_MAX  px_as(pxi64, 0x7fffffffffffffff)
+    #define PX_I64_MIN  px_as(pxi64, 0x8000000000000000)
 
-    #define PX_U64_SIZE pxSize(pxu64)
-    #define PX_U64_MAX  pxCast(pxu64, 0xffffffffffffffff)
-    #define PX_U64_MIN  pxCast(pxu64, 0x0000000000000000)
+    #define PX_U64_SIZE px_size(pxu64)
+    #define PX_U64_MAX  px_as(pxu64, 0xffffffffffffffff)
+    #define PX_U64_MIN  px_as(pxu64, 0x0000000000000000)
 
-    #define PX_B64_SIZE pxSize(pxb64)
+    #define PX_B64_SIZE px_size(pxb64)
 
-    #define PX_F64_SIZE pxSize(pxf64)
+    #define PX_F64_SIZE px_size(pxf64)
 
-    #define PX_F64_EXP_MAX  pxCast(pxi32, 1023)
-    #define PX_F64_EXP_MIN  pxCast(pxi32, -1022)
-    #define PX_F64_EXP_BIAS pxCast(pxi32, 1023)
-    #define PX_F64_EXP_SIZE pxCast(pxi64, 11)
-    #define PX_F64_EXP_MASK pxCast(pxu64, 0x7ff0000000000000)
+    #define PX_F64_EXP_MAX  px_as(pxi32, 1023)
+    #define PX_F64_EXP_MIN  px_as(pxi32, -1022)
+    #define PX_F64_EXP_BIAS px_as(pxi32, 1023)
+    #define PX_F64_EXP_SIZE px_as(pxi64, 11)
+    #define PX_F64_EXP_MASK px_as(pxu64, 0x7ff0000000000000)
 
-    #define PX_F64_FRAC_SIZE pxCast(pxi64, 52)
-    #define PX_F64_FRAC_MASK pxCast(pxu64, 0x000fffffffffffff)
+    #define PX_F64_FRAC_SIZE px_as(pxi64, 52)
+    #define PX_F64_FRAC_MASK px_as(pxu64, 0x000fffffffffffff)
 
-    #define PX_F64_SIGN_SIZE pxCast(pxi64, 1)
-    #define PX_F64_SIGN_MASK pxCast(pxu64, 0x8000000000000000)
+    #define PX_F64_SIGN_SIZE px_as(pxi64, 1)
+    #define PX_F64_SIGN_MASK px_as(pxu64, 0x8000000000000000)
 
 #endif
 

@@ -3,14 +3,35 @@
 #include <stdio.h>
 
 void
-showEscapeFromString8(PxString8 string)
+showConsoleEscSeqnc(PxConsoleEscSeqnc value)
 {
-    PxEscape escape = {0};
-    pxiword  size   = 0;
+    printf("func  = %3c\n", value.func);
+    printf("flags = %3u\n", value.flags);
 
-    pxb8 state = pxEscapeFromString8(&escape, string, &size);
+    for (pxiword i = 0; i < value.size; i += 1) {
+        PxConsoleEscGroup* group = &value.items[i];
 
-    printf("\x1b[34m'");
+        printf(" -> group(%lli) = ", i);
+
+        for (pxiword j = 0; j < group->size; j += 1) {
+            printf("%3llu", group->items[j]);
+
+            if (j + 1 < group->size)
+                printf(" ");
+        }
+
+        printf("\n");
+    }
+}
+
+void
+showConsoleEscSeqncFromString8(PxString8 string)
+{
+    PxConsoleEscSeqnc escape = {0};
+
+    pxb8 state = pxConsoleEscSeqncFromString8(string, &escape);
+
+    printf("\x1b[94m'");
 
     for (pxiword i = 0; i < string.length; i += 1) {
         pxu8 byte = string.memory[i];
@@ -24,26 +45,9 @@ showEscapeFromString8(PxString8 string)
             printf(" ");
     }
 
-    printf("'\x1b[0m -> %s\n", state != 0 ? "\x1b[32mT\x1b[0m" : "\x1b[31mF\x1b[0m");
+    printf("'\x1b[0m -> %s\n", state != 0 ? "\x1b[92mT\x1b[0m" : "\x1b[91mF\x1b[0m");
 
-    if (state != 0) {
-        printf(" -> type  = %u\n", escape.type);
-
-        for (pxiword i = 0; i < escape.size; i += 1) {
-            PxEscapeGroup* group = &escape.groups[i];
-
-            printf(" -> group = {");
-
-            for (pxiword j = 0; j < group->size; j += 1) {
-                printf("%llu", group->values[j]);
-
-                if (j + 1 < group->size)
-                    printf(", ");
-            }
-
-            printf("}\n");
-        }
-    }
+    if (state != 0) showConsoleEscSeqnc(escape);
 }
 
 int
@@ -51,17 +55,17 @@ main(int argc, char** argv)
 {
     printf("VALID:\n\n");
 
-    showEscapeFromString8(pxs8("\x1b[1;5D"));
-    showEscapeFromString8(pxs8("\x1b[A"));
-    showEscapeFromString8(pxs8("\x1b[38;2;1;2;3m"));
-    showEscapeFromString8(pxs8("\x1b[9m"));
-    showEscapeFromString8(pxs8("\x1b[97u"));
-    showEscapeFromString8(pxs8("\x1b[12~"));
-    showEscapeFromString8(pxs8("\x1b[12;12H"));
-    showEscapeFromString8(pxs8("\x1b[97;;229u"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[1;5D"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[A"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[38;2;1;2;3m"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[9m"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[97:5u"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[12~"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[15;10H"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[97;;229u"));
 
     printf("\nINVALID:\n\n");
 
-    showEscapeFromString8(pxs8("\x1b[\x1b\x31;6A"));
-    showEscapeFromString8(pxs8("\x1bz"));
+    showConsoleEscSeqncFromString8(pxs8("\x1b[\x1b\x31;6A"));
+    showConsoleEscSeqncFromString8(pxs8("\x1bz"));
 }

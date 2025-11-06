@@ -37,7 +37,7 @@ pxArrayCopyAmount(PxArena* arena, PxArray* value, pxiword amount)
 
     if (result.length <= 0) return result;
 
-    result.size = pxMin(result.length, value->size);
+    result.size = px_min(result.length, value->size);
 
     for (pxiword i = 0; i < result.size; i += 1) {
         pxMemoryCopy(result.memory + i * stride,
@@ -234,7 +234,7 @@ pxArrayUpdateTailMemory(PxArray* self, void* memory, pxiword stride)
 }
 
 pxb8
-pxArrayReadMemory(PxArray* self, pxiword index, void* memory, pxiword stride)
+pxArrayGetMemory(PxArray* self, pxiword index, void* memory, pxiword stride)
 {
     if (index < 0 || index >= self->size)
         return 0;
@@ -252,15 +252,15 @@ pxArrayReadMemory(PxArray* self, pxiword index, void* memory, pxiword stride)
 }
 
 pxb8
-pxArrayReadHeadMemory(PxArray* self, void* memory, pxiword stride)
+pxArrayGetHeadMemory(PxArray* self, void* memory, pxiword stride)
 {
-    return pxArrayReadMemory(self, 0, memory, stride);
+    return pxArrayGetMemory(self, 0, memory, stride);
 }
 
 pxb8
-pxArrayReadTailMemory(PxArray* self, void* memory, pxiword stride)
+pxArrayGetTailMemory(PxArray* self, void* memory, pxiword stride)
 {
-    return pxArrayReadMemory(self, self->size - 1, memory, stride);
+    return pxArrayGetMemory(self, self->size - 1, memory, stride);
 }
 
 #endif // PX_CORE_STRUCTURE_ARRAY_C

@@ -1,14 +1,15 @@
 #ifndef PX_CORE_FORMAT_EXPORT_C
 #define PX_CORE_FORMAT_EXPORT_C
 
-#include "memory8.c"
-#include "memory16.c"
-#include "memory32.c"
+#include "config.c"
 
-#include "string8.c"
-#include "string16.c"
-#include "string32.c"
+#include "unsigned.c"
+#include "integer.c"
+#include "boolean.c"
 
-#include "builder.c"
+#include "message.c"
+
+#include "printing.c"
+#include "matching.c"
 
 #endif // PX_CORE_FORMAT_EXPORT_C

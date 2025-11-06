@@ -13,7 +13,7 @@ showString8(PxString8 self)
         printf("[%lli] %8li", index, value);
 
         if (pxUnicodeIsAscii(value) != 0)
-            printf(" (%c)", pxCast(pxi8, value));
+            printf(" (%c)", px_as(pxi8, value));
 
         printf("\n");
 
@@ -26,7 +26,7 @@ main(int argc, char** argv)
 {
     pxu8 memory[PX_MEMORY_KIB] = {0};
 
-    PxArena arena = pxArenaMake(memory, pxSize(memory));
+    PxArena arena = pxArenaMake(memory, px_size(memory));
 
     PxString8 str1 = pxString8Copy(&arena, pxs8("ciao"));
     PxString8 str2 = pxString8CopyUnicode(&arena, 0x1f600);

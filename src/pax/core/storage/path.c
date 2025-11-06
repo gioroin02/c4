@@ -287,11 +287,10 @@ pxString16FromPath(PxArena* arena, PxPath* value, PxString16 pivot)
         while (other < node->length) {
             pxi32 unicode = 0;
 
-            other += pxUtf8ReadMemory8Forw(
-                node->memory, node->length, other, &unicode);
+            other += pxUtf8ReadForw(node->memory, node->length,
+                other, &unicode);
 
-            index += pxUtf16WriteMemory16Forw(
-                result, length, index, unicode);
+            index += pxUtf16WriteForw(result, length, index, unicode);
         }
 
         if (node->next != 0) {
@@ -331,11 +330,10 @@ pxString32FromPath(PxArena* arena, PxPath* value, PxString32 pivot)
         while (other < node->length) {
             pxi32 unicode = 0;
 
-            other += pxUtf8ReadMemory8Forw(
-                node->memory, node->length, other, &unicode);
+            other += pxUtf8ReadForw(node->memory, node->length,
+                other, &unicode);
 
-            index += pxUtf32WriteMemory32Forw(
-                result, length, index, unicode);
+            index += pxUtf32WriteForw(result, length, index, unicode);
         }
 
         if (node->next != 0) {

@@ -11,14 +11,13 @@
     #define __pxStandardOutput__ pxWindowsStandardOutput
     #define __pxStandardError__  pxWindowsStandardError
 
-    #define __pxFileCreate__      pxWindowsFileCreate
-    #define __pxFileReplace__     pxWindowsFileReplace
-    #define __pxFileOpen__        pxWindowsFileOpen
-    #define __pxFileClose__       pxWindowsFileClose
-    #define __pxFileDestroy__     pxWindowsFileDestroy
-    #define __pxFileDelete__      pxWindowsFileDelete
-    #define __pxFileWriteMemory__ pxWindowsFileWriteMemory
-    #define __pxFileReadMemory__  pxWindowsFileReadMemory
+    #define __pxFileCreate__  pxWindowsFileCreate
+    #define __pxFileReplace__ pxWindowsFileReplace
+    #define __pxFileOpen__    pxWindowsFileOpen
+    #define __pxFileClose__   pxWindowsFileClose
+    #define __pxFileDestroy__ pxWindowsFileDestroy
+    #define __pxFileWrite__   pxWindowsFileWrite
+    #define __pxFileRead__    pxWindowsFileRead
 
 #elif PX_SYSTEM == PX_SYSTEM_LINUX
 
@@ -28,14 +27,13 @@
     #define __pxStandardOutput__ pxLinuxStandardOutput
     #define __pxStandardError__  pxLinuxStandardError
 
-    #define __pxFileCreate__      pxLinuxFileCreate
-    #define __pxFileReplace__     pxLinuxFileReplace
-    #define __pxFileOpen__        pxLinuxFileOpen
-    #define __pxFileClose__       pxLinuxFileClose
-    #define __pxFileDestroy__     pxLinuxFileDestroy
-    #define __pxFileDelete__      pxLinuxFileDelete
-    #define __pxFileWriteMemory__ pxLinuxFileWriteMemory
-    #define __pxFileReadMemory__  pxLinuxFileReadMemory
+    #define __pxFileCreate__  pxLinuxFileCreate
+    #define __pxFileReplace__ pxLinuxFileReplace
+    #define __pxFileOpen__    pxLinuxFileOpen
+    #define __pxFileClose__   pxLinuxFileClose
+    #define __pxFileDestroy__ pxLinuxFileDestroy
+    #define __pxFileWrite__   pxLinuxFileWrite
+    #define __pxFileRead__    pxLinuxFileRead
 
 #else
 
@@ -86,95 +84,45 @@ pxFileClose(PxFile self)
 }
 
 pxb8
-pxFileDestroy(PxFile self, PxArena* arena)
+pxFileDestroy(PxArena* arena, PxString8 base, PxString8 name)
 {
-    return __pxFileDestroy__(self, arena);
-}
-
-pxb8
-pxFileDelete(PxArena* arena, PxString8 base, PxString8 name)
-{
-    return __pxFileDelete__(arena, base, name);
+    return __pxFileDestroy__(arena, base, name);
 }
 
 pxiword
-pxFileWrite(PxFile self, PxBuffer8* buffer)
+pxFileWrite(PxFile self, pxu8* memory, pxiword length)
 {
-    pxBuffer8Normalize(buffer);
-
-    pxu8*   memory = buffer->memory;
-    pxiword size   = buffer->size;
-
-    if (size <= 0) return 0;
-
-    pxiword temp = pxFileWriteMemory(self, memory, size, 1);
-
-    buffer->size -= temp;
-    buffer->head  = (buffer->head + temp) % buffer->length;
-
-    return temp;
+    return __pxFileWrite__(self, memory, length);
 }
 
 pxiword
-pxFileWriteMemory(PxFile self, void* memory, pxiword amount, pxiword stride)
+pxFileRead(PxFile self, pxu8* memory, pxiword length)
 {
-    return __pxFileWriteMemory__(self, memory, amount, stride);
+    return __pxFileRead__(self, memory, length);
 }
 
-pxiword
-pxFileRead(PxFile self, PxBuffer8* buffer)
+PxSource
+pxSourceFromFile(PxFile self)
 {
-    pxBuffer8Normalize(buffer);
+    PxSource result = {0};
 
-    pxu8*   memory = buffer->memory + buffer->size;
-    pxiword size   = buffer->length - buffer->size;
+    if (self == 0) return result;
 
-    if (size <= 0) return 0;
-
-    pxiword temp = pxFileReadMemory(self, memory, size, 1);
-
-    buffer->size += temp;
-    buffer->tail  = (buffer->tail + temp) % buffer->length;
-
-    return temp;
-}
-
-pxiword
-pxFileReadMemory(PxFile self, void* memory, pxiword amount, pxiword stride)
-{
-    return __pxFileReadMemory__(self, memory, amount, stride);
-}
-
-PxWriter
-pxFileWriter(PxFile self, PxArena* arena, pxiword length)
-{
-    PxWriter result = {0};
-
-    if (self == 0 || length <= 0) return result;
-
-    result.buffer = pxBuffer8Reserve(arena, length);
-
-    if (result.buffer.length > 0) {
-        result.ctxt = self;
-        result.proc = &pxFileWrite;
-    }
+    result.ctxt = self;
+    result.proc = &pxFileRead;
 
     return result;
 }
 
-PxReader
-pxFileReader(PxFile self, PxArena* arena, pxiword length)
+PxTarget
+pxTargetFromFile(PxFile self)
 {
-    PxReader result = {0};
+    PxTarget result = {0};
 
-    if (self == 0 || length <= 0) return result;
+    if (self == 0) return result;
 
-    result.buffer = pxBuffer8Reserve(arena, length);
-
-    if (result.buffer.length) {
-        result.ctxt = self;
-        result.proc = &pxFileRead;
-    }
+    result.ctxt = self;
+    result.proc = &pxFileWrite;
 
     return result;
 }

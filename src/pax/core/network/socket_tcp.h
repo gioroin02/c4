@@ -1,50 +1,44 @@
 #ifndef PX_CORE_NETWORK_SOCKET_TCP_H
 #define PX_CORE_NETWORK_SOCKET_TCP_H
 
-#include "address.h"
+#include "addr.h"
 
 typedef void* PxSocketTcp;
 
 PxSocketTcp
-pxSocketTcpCreate(PxArena* arena, PxAddressType type);
+pxSocketTcpCreate(PxArena* arena, PxAddrType type);
 
 void
 pxSocketTcpDestroy(PxSocketTcp self);
 
-PxAddress
-pxSocketTcpGetAddress(PxSocketTcp self);
+PxAddr
+pxSocketTcpGetAddr(PxSocketTcp self);
 
 pxu16
 pxSocketTcpGetPort(PxSocketTcp self);
 
 pxb8
-pxSocketTcpBind(PxSocketTcp self, PxAddress address, pxu16 port);
+pxSocketTcpBind(PxSocketTcp self, PxAddr addr, pxu16 port);
 
 pxb8
 pxSocketTcpListen(PxSocketTcp self);
 
 pxb8
-pxSocketTcpConnect(PxSocketTcp self, PxAddress address, pxu16 port);
+pxSocketTcpConnect(PxSocketTcp self, PxAddr addr, pxu16 port);
 
 PxSocketTcp
 pxSocketTcpAccept(PxSocketTcp self, PxArena* arena);
 
 pxiword
-pxSocketTcpWrite(PxSocketTcp self, PxBuffer8* buffer);
+pxSocketTcpWrite(PxSocketTcp self, pxu8* memory, pxiword length);
 
 pxiword
-pxSocketTcpWriteMemory(PxSocketTcp self, void* memory, pxiword amount, pxiword stride);
+pxSocketTcpRead(PxSocketTcp self, pxu8* memory, pxiword length);
 
-pxiword
-pxSocketTcpRead(PxSocketTcp self, PxBuffer8* buffer);
+PxSource
+pxSourceFromSocketTcp(PxSocketTcp self);
 
-pxiword
-pxSocketTcpReadMemory(PxSocketTcp self, void* memory, pxiword amount, pxiword stride);
-
-PxReader
-pxSocketTcpReader(PxSocketTcp self, PxArena* arena, pxiword length);
-
-PxWriter
-pxSocketTcpWriter(PxSocketTcp self, PxArena* arena, pxiword length);
+PxTarget
+pxTargetFromSocketTcp(PxSocketTcp self);
 
 #endif // PX_CORE_NETWORK_SOCKET_TCP_H

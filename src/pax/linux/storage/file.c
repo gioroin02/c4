@@ -78,12 +78,11 @@ pxLinuxFileCreate(PxArena* arena, PxString8 base, PxString8 name, PxFileMode mod
     pxiword offset = pxArenaOffset(arena);
     pxiword access = O_CREAT | O_EXCL;
 
-    pxiword mask = PX_FILE_MODE_READ | PX_FILE_MODE_WRITE;
+    if ((mode & PX_FILE_MODE_RD_WR) == PX_FILE_MODE_RD_WR)
+        access |= O_RDWR;
 
-    if ((mode & mask) == mask) access |= O_RDWR;
-
-    if ((mode & PX_FILE_MODE_READ)  != 0) access |= O_RDONLY;
-    if ((mode & PX_FILE_MODE_WRITE) != 0) access |= O_WRONLY;
+    if ((mode & PX_FILE_MODE_RD) != 0) access |= O_RDONLY;
+    if ((mode & PX_FILE_MODE_WR) != 0) access |= O_WRONLY;
 
     PxLinuxFile* result = pxArenaReserve(arena, PxLinuxFile, 1);
 
@@ -117,12 +116,11 @@ pxLinuxFileReplace(PxArena* arena, PxString8 base, PxString8 name, PxFileMode mo
     pxiword offset = pxArenaOffset(arena);
     pxiword access = O_CREAT | O_TRUNC;
 
-    pxiword mask = PX_FILE_MODE_READ | PX_FILE_MODE_WRITE;
+    if ((mode & PX_FILE_MODE_RD_WR) == PX_FILE_MODE_RD_WR)
+        access |= O_RDWR;
 
-    if ((mode & mask) == mask) access |= O_RDWR;
-
-    if ((mode & PX_FILE_MODE_READ)  != 0) access |= O_RDONLY;
-    if ((mode & PX_FILE_MODE_WRITE) != 0) access |= O_WRONLY;
+    if ((mode & PX_FILE_MODE_RD) != 0) access |= O_RDONLY;
+    if ((mode & PX_FILE_MODE_WR) != 0) access |= O_WRONLY;
 
     PxLinuxFile* result = pxArenaReserve(arena, PxLinuxFile, 1);
 
@@ -156,12 +154,11 @@ pxLinuxFileOpen(PxArena* arena, PxString8 base, PxString8 name, PxFileMode mode)
     pxiword offset = pxArenaOffset(arena);
     pxiword access = O_APPEND;
 
-    pxiword mask = PX_FILE_MODE_READ | PX_FILE_MODE_WRITE;
+    if ((mode & PX_FILE_MODE_RD_WR) == PX_FILE_MODE_RD_WR)
+        access |= O_RDWR;
 
-    if ((mode & mask) == mask) access |= O_RDWR;
-
-    if ((mode & PX_FILE_MODE_READ)  != 0) access |= O_RDONLY;
-    if ((mode & PX_FILE_MODE_WRITE) != 0) access |= O_WRONLY;
+    if ((mode & PX_FILE_MODE_RD) != 0) access |= O_RDONLY;
+    if ((mode & PX_FILE_MODE_WR) != 0) access |= O_WRONLY;
 
     PxLinuxFile* result = pxArenaReserve(arena, PxLinuxFile, 1);
 
@@ -205,45 +202,7 @@ pxLinuxFileClose(PxLinuxFile* self)
 }
 
 pxb8
-pxLinuxFileDestroy(PxLinuxFile* self, PxArena* arena)
-{
-    return 0;
-
-    /*
-    if (self == 0 || self->handle == -1)
-        return 0;
-
-    pxiword length = GetFinalPathNameByHandleW(
-        self->handle, 0, 0, FILE_NAME_NORMALIZED);
-
-    if (length <= 0) return 0;
-
-    pxiword offset = pxArenaOffset(arena);
-    pxu8*   memory = pxArenaReserve(arena, pxu8, length + 1);
-
-    if (memory != 0) {
-        pxiword size = GetFinalPathNameByHandleW(self->handle,
-            memory, length, FILE_NAME_NORMALIZED);
-
-        if (size + 1 == length) {
-            CloseHandle(self->handle);
-
-            pxiword state = unlink(memory);
-
-            pxArenaRewind(arena, offset);
-
-            if (state != 0) return 1;
-        }
-    }
-
-    pxArenaRewind(arena, offset);
-
-    return 0;
-    */
-}
-
-pxb8
-pxLinuxFileDelete(PxArena* arena, PxString8 base, PxString8 name)
+pxLinuxFileDestroy(PxArena* arena, PxString8 base, PxString8 name)
 {
     pxiword offset = pxArenaOffset(arena);
     PxPath  path   = pxPathFromString8(arena, base, pxs8("/"));
@@ -267,14 +226,13 @@ pxLinuxFileDelete(PxArena* arena, PxString8 base, PxString8 name)
 }
 
 pxiword
-pxLinuxFileWriteMemory(PxLinuxFile* self, void* memory, pxiword amount, pxiword stride)
+pxLinuxFileWrite(PxLinuxFile* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    pxiword temp   = 0;
+    pxiword temp = 0;
 
     for (pxiword i = 0; i < length;) {
-        char* mem = pxCast(char*, memory + i);
-        int   len = pxCast(int,   length - i);
+        char* mem = px_as(char*, memory + i);
+        int   len = px_as(int,   length - i);
 
         do {
             temp = write(self->handle, mem, len);
@@ -290,13 +248,12 @@ pxLinuxFileWriteMemory(PxLinuxFile* self, void* memory, pxiword amount, pxiword 
 }
 
 pxiword
-pxLinuxFileReadMemory(PxLinuxFile* self, void* memory, pxiword amount, pxiword stride)
+pxLinuxFileRead(PxLinuxFile* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    pxiword temp   = 0;
+    pxiword temp = 0;
 
-    char* mem = pxCast(char*, memory);
-    int   len = pxCast(int,   length);
+    char* mem = px_as(char*, memory);
+    int   len = px_as(int,   length);
 
     do {
         temp = read(self->handle, mem, len);

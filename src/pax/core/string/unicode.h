@@ -3,6 +3,8 @@
 
 #include "import.h"
 
+#define PX_ASCII_POINTS px_as(pxiword, 128)
+
 typedef enum PxAscii
 {
     PX_ASCII_NULL,
@@ -136,6 +138,60 @@ typedef enum PxAscii
 }
 PxAscii;
 
+#define PX_UTF8_UNITS  px_as(pxiword, 4)
+#define PX_UTF16_UNITS px_as(pxiword, 2)
+#define PX_UTF32_UNITS px_as(pxiword, 1)
+
+typedef struct PxUtf8
+{
+    union
+    {
+        struct
+        {
+            pxu8 a, b, c, d;
+        };
+
+        pxu8 items[PX_UTF8_UNITS];
+    };
+
+    pxiword size;
+}
+PxUtf8;
+
+typedef struct PxUtf16
+{
+    union
+    {
+        struct
+        {
+            pxu16 a, b;
+        };
+
+        pxu16 items[PX_UTF16_UNITS];
+    };
+
+    pxiword size;
+}
+PxUtf16;
+
+typedef struct PxUtf32
+{
+    union
+    {
+        struct
+        {
+            pxu32 a;
+        };
+
+        pxu32 items[PX_UTF32_UNITS];
+    };
+
+    pxiword size;
+}
+PxUtf32;
+
+/* Unicode */
+
 pxb8
 pxUnicodeIsValid(pxi32 value);
 
@@ -152,27 +208,108 @@ pxb8
 pxUnicodeIsAscii(pxi32 value);
 
 pxb8
-pxAsciiIsSpace(pxi32 value);
+pxUnicodeIsAsciiCntrl(pxi32 value);
+
+/* Utf8 */
 
 pxb8
-pxAsciiIsNumeric(pxi32 value, pxuword radix, pxb8 upper);
+pxUtf8Encode(PxUtf8* self, pxi32 value);
+
+pxiword
+pxUtf8WriteForw(pxu8* memory, pxiword length, pxiword index, pxi32 value);
+
+pxiword
+pxUtf8WriteBack(pxu8* memory, pxiword length, pxiword index, pxi32 value);
 
 pxb8
-pxAsciiIsDigit(pxi32 value, pxuword radix, pxb8 upper);
+pxUtf8Decode(PxUtf8* self, pxi32* value);
+
+pxiword
+pxUtf8ReadForw(pxu8* memory, pxiword length, pxiword index, pxi32* value);
+
+pxiword
+pxUtf8ReadBack(pxu8* memory, pxiword length, pxiword index, pxi32* value);
+
+pxiword
+pxUtf8UnitsToWrite(pxi32 value);
+
+pxiword
+pxUtf8UnitsToRead(pxu8 value);
 
 pxb8
-pxAsciiIsLetter(pxi32 value);
+pxUtf8IsTrailing(pxu8 value);
 
 pxb8
-pxAsciiIsLetterUpper(pxi32 value);
+pxUtf8IsOverlong(pxi32 value, pxiword units);
+
+pxiword
+pxUtf8UnitsFromMemory16(pxu16* memory, pxiword length);
+
+pxiword
+pxUtf8UnitsFromMemory32(pxu32* memory, pxiword length);
+
+/* Utf16 */
 
 pxb8
-pxAsciiIsLetterLower(pxi32 value);
+pxUtf16Encode(PxUtf16* self, pxi32 value);
 
-pxi32
-pxAsciiDigitFromValue(pxuword value, pxuword radix, pxb8 upper);
+pxiword
+pxUtf16WriteForw(pxu16* memory, pxiword length, pxiword index, pxi32 value);
 
-pxuword
-pxAsciiValueFromDigit(pxi32 value, pxuword radix, pxb8 upper);
+pxiword
+pxUtf16WriteBack(pxu16* memory, pxiword length, pxiword index, pxi32 value);
+
+pxb8
+pxUtf16Decode(PxUtf16* self, pxi32* value);
+
+pxiword
+pxUtf16ReadForw(pxu16* memory, pxiword length, pxiword index, pxi32* value);
+
+pxiword
+pxUtf16ReadBack(pxu16* memory, pxiword length, pxiword index, pxi32* value);
+
+pxiword
+pxUtf16UnitsToWrite(pxi32 value);
+
+pxiword
+pxUtf16UnitsToRead(pxu16 value);
+
+pxiword
+pxUtf16UnitsFromMemory8(pxu8* memory, pxiword length);
+
+pxiword
+pxUtf16UnitsFromMemory32(pxu32* memory, pxiword length);
+
+/* Utf32 */
+
+pxb8
+pxUtf32Encode(PxUtf32* self, pxi32 value);
+
+pxiword
+pxUtf32WriteForw(pxu32* memory, pxiword length, pxiword index, pxi32 value);
+
+pxiword
+pxUtf32WriteBack(pxu32* memory, pxiword length, pxiword index, pxi32 value);
+
+pxb8
+pxUtf32Decode(PxUtf32* self, pxi32* value);
+
+pxiword
+pxUtf32ReadForw(pxu32* memory, pxiword length, pxiword index, pxi32* value);
+
+pxiword
+pxUtf32ReadBack(pxu32* memory, pxiword length, pxiword index, pxi32* value);
+
+pxiword
+pxUtf32UnitsToWrite(pxi32 value);
+
+pxiword
+pxUtf32UnitsToRead(pxu32 value);
+
+pxiword
+pxUtf32UnitsFromMemory8(pxu8* memory, pxiword length);
+
+pxiword
+pxUtf32UnitsFromMemory16(pxu16* memory, pxiword length);
 
 #endif // PX_CORE_STRING_UNICODE_H

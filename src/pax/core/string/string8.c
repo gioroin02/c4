@@ -1,5 +1,5 @@
-#ifndef PX_CORE_STRING_STRING8_C
-#define PX_CORE_STRING_STRING8_C
+#ifndef PX_CORE_STRING_STRING_8_C
+#define PX_CORE_STRING_STRING_8_C
 
 #include "string8.h"
 
@@ -20,7 +20,7 @@ PxString8
 pxString8FromMemory(void* memory, pxiword length)
 {
     for (pxiword i = 0; i < length; i += 1) {
-        if (pxCast(pxu8*, memory)[i] != 0)
+        if (px_as(pxu8*, memory)[i] != 0)
             continue;
 
         return pxString8Make(memory, i);
@@ -38,7 +38,7 @@ pxString8CopyUnicode(PxArena* arena, pxi32 value)
     if (result == 0 || length <= 0)
         return (PxString8) {0};
 
-    pxUtf8WriteMemory8Forw(result, length, 0, value);
+    pxUtf8WriteForw(result, length, 0, value);
 
     return pxString8Make(result, length);
 }
@@ -246,24 +246,24 @@ pxString8TrimSpaces(PxString8 self)
     for (; start < stop; start += units) {
         pxi32 unicode = 0;
 
-        units = pxUtf8ReadMemory8Forw(self.memory,
+        units = pxUtf8ReadForw(self.memory,
             self.length, start, &unicode);
 
         if (units <= 0) return (PxString8) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
     for (; start < stop; stop -= units) {
         pxi32 unicode = 0;
 
-        units = pxUtf8ReadMemory8Back(self.memory,
+        units = pxUtf8ReadBack(self.memory,
             self.length, stop - 1, &unicode);
 
         if (units <= 0) return (PxString8) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
@@ -280,12 +280,12 @@ pxString8TrimSpacesHead(PxString8 self)
     for (; start < stop; start += units) {
         pxi32 unicode = 0;
 
-        units = pxUtf8ReadMemory8Forw(self.memory,
+        units = pxUtf8ReadForw(self.memory,
             self.length, start, &unicode);
 
         if (units <= 0) return (PxString8) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
@@ -302,12 +302,12 @@ pxString8TrimSpacesTail(PxString8 self)
     for (; start < stop; stop -= units) {
         pxi32 unicode = 0;
 
-        units = pxUtf8ReadMemory8Back(self.memory,
+        units = pxUtf8ReadBack(self.memory,
             self.length, stop - 1, &unicode);
 
         if (units <= 0) return (PxString8) {0};
 
-        if (pxAsciiIsSpace(unicode) == 0)
+        if (pxUnicodeIsAsciiCntrl(unicode) == 0)
             break;
     }
 
@@ -359,7 +359,7 @@ pxString8FindFirst(PxString8 self, pxiword start, PxString8 value, pxiword* inde
 pxb8
 pxString8FindFirstMemory8(PxString8 self, pxiword start, pxu8* memory, pxiword length, pxiword* index)
 {
-    start = pxClamp(start, 0, self.length);
+    start = px_between(start, 0, self.length);
 
     for (pxiword i = start; i < self.length; i += 1) {
         PxString8 slice = pxString8SliceLength(self, i, length);
@@ -384,7 +384,7 @@ pxString8FindLast(PxString8 self, pxiword start, PxString8 value, pxiword* index
 pxb8
 pxString8FindLastMemory8(PxString8 self, pxiword start, pxu8* memory, pxiword length, pxiword* index)
 {
-    start = pxClamp(start, 0, self.length);
+    start = px_between(start, 0, self.length);
 
     for (pxiword i = start; i > 0; i -= 1) {
         PxString8 slice = pxString8SliceLength(self, i - length, length);
@@ -432,7 +432,7 @@ pxString8Next(PxString8 self, pxiword index, pxiword* units, pxi32* value)
     if (index < 0 || index >= self.length)
         return 0;
 
-    pxiword step = pxUtf8ReadMemory8Forw(self.memory,
+    pxiword step = pxUtf8ReadForw(self.memory,
         self.length, index, value);
 
     if (step == 0) return 0;
@@ -448,7 +448,7 @@ pxString8Prev(PxString8 self, pxiword index, pxiword* units, pxi32* value)
     if (index < 0 || index >= self.length)
         return 0;
 
-    pxiword step = pxUtf8ReadMemory8Back(self.memory,
+    pxiword step = pxUtf8ReadBack(self.memory,
         self.length, index, value);
 
     if (step == 0) return 0;
@@ -458,4 +458,4 @@ pxString8Prev(PxString8 self, pxiword index, pxiword* units, pxi32* value)
     return 1;
 }
 
-#endif // PX_CORE_STRING_STRING8_C
+#endif // PX_CORE_STRING_STRING_8_C

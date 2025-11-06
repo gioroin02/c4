@@ -20,7 +20,7 @@ main(int argc, char** argv)
     for (pxiword i = 0; i < queue.size; i += 1) {
         pxi32 value = 0;
 
-        pxQueueRead(&queue, i, pxi32, &value);
+        pxQueueGet(&queue, i, pxi32, &value);
 
         printf("%li\n", value);
     }
@@ -36,7 +36,7 @@ main(int argc, char** argv)
     for (pxiword i = 0; i < queue.size; i += 1) {
         pxi32 value = 0;
 
-        pxQueueRead(&queue, i, pxi32, &value);
+        pxQueueGet(&queue, i, pxi32, &value);
 
         printf("%li\n", value);
     }

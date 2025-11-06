@@ -80,9 +80,8 @@ pxWindowsFileCreate(PxArena* arena, PxString8 base, PxString8 name, PxFileMode m
     pxiword offset = pxArenaOffset(arena);
     pxiword access = 0;
 
-    if ((mode & PX_FILE_MODE_READ)  != 0) access |= GENERIC_READ;
-    if ((mode & PX_FILE_MODE_WRITE) != 0) access |= GENERIC_WRITE;
-    if ((mode & PX_FILE_MODE_EXEC)  != 0) access |= GENERIC_EXECUTE;
+    if ((mode & PX_FILE_MODE_RD) != 0) access |= GENERIC_READ;
+    if ((mode & PX_FILE_MODE_WR) != 0) access |= GENERIC_WRITE;
 
     PxWindowsFile* result = pxArenaReserve(arena, PxWindowsFile, 1);
 
@@ -96,7 +95,7 @@ pxWindowsFileCreate(PxArena* arena, PxString8 base, PxString8 name, PxFileMode m
             pxString16FromPath(arena, &path, pxs16(L"\\"));
 
         if (string.length > 0) {
-            wchar_t* memory = pxCast(wchar_t*, string.memory);
+            wchar_t* memory = px_as(wchar_t*, string.memory);
 
             result->handle = CreateFileW(memory, access, FILE_SHARE_READ,
                 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
@@ -119,9 +118,8 @@ pxWindowsFileReplace(PxArena* arena, PxString8 base, PxString8 name, PxFileMode 
     pxiword offset = pxArenaOffset(arena);
     pxiword access = 0;
 
-    if ((mode & PX_FILE_MODE_READ)  != 0) access |= GENERIC_READ;
-    if ((mode & PX_FILE_MODE_WRITE) != 0) access |= GENERIC_WRITE;
-    if ((mode & PX_FILE_MODE_EXEC)  != 0) access |= GENERIC_EXECUTE;
+    if ((mode & PX_FILE_MODE_RD) != 0) access |= GENERIC_READ;
+    if ((mode & PX_FILE_MODE_WR) != 0) access |= GENERIC_WRITE;
 
     PxWindowsFile* result = pxArenaReserve(arena, PxWindowsFile, 1);
 
@@ -135,7 +133,7 @@ pxWindowsFileReplace(PxArena* arena, PxString8 base, PxString8 name, PxFileMode 
             pxString16FromPath(arena, &path, pxs16(L"\\"));
 
         if (string.length > 0) {
-            wchar_t* memory = pxCast(wchar_t*, string.memory);
+            wchar_t* memory = px_as(wchar_t*, string.memory);
 
             result->handle = CreateFileW(memory, access, FILE_SHARE_READ,
                 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
@@ -158,9 +156,8 @@ pxWindowsFileOpen(PxArena* arena, PxString8 base, PxString8 name, PxFileMode mod
     pxiword offset = pxArenaOffset(arena);
     pxiword access = 0;
 
-    if ((mode & PX_FILE_MODE_READ)  != 0) access |= GENERIC_READ;
-    if ((mode & PX_FILE_MODE_WRITE) != 0) access |= GENERIC_WRITE;
-    if ((mode & PX_FILE_MODE_EXEC)  != 0) access |= GENERIC_EXECUTE;
+    if ((mode & PX_FILE_MODE_RD) != 0) access |= GENERIC_READ;
+    if ((mode & PX_FILE_MODE_WR) != 0) access |= GENERIC_WRITE;
 
     PxWindowsFile* result = pxArenaReserve(arena, PxWindowsFile, 1);
 
@@ -174,7 +171,7 @@ pxWindowsFileOpen(PxArena* arena, PxString8 base, PxString8 name, PxFileMode mod
             pxString16FromPath(arena, &path, pxs16(L"\\"));
 
         if (string.length > 0) {
-            wchar_t* memory = pxCast(wchar_t*, string.memory);
+            wchar_t* memory = px_as(wchar_t*, string.memory);
 
             result->handle = CreateFileW(memory, access, FILE_SHARE_READ,
                 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -203,41 +200,7 @@ pxWindowsFileClose(PxWindowsFile* self)
 }
 
 pxb8
-pxWindowsFileDestroy(PxWindowsFile* self, PxArena* arena)
-{
-    if (self == 0 || self->handle == INVALID_HANDLE_VALUE)
-        return 0;
-
-    pxiword length = GetFinalPathNameByHandleW(
-        self->handle, 0, 0, FILE_NAME_NORMALIZED);
-
-    if (length <= 0) return 0;
-
-    pxiword offset = pxArenaOffset(arena);
-    pxu16*  memory = pxArenaReserve(arena, pxu16, length + 1);
-
-    if (memory != 0) {
-        pxiword size = GetFinalPathNameByHandleW(self->handle,
-            memory, length, FILE_NAME_NORMALIZED);
-
-        if (size + 1 == length) {
-            CloseHandle(self->handle);
-
-            pxb8 state = DeleteFileW(pxCast(wchar_t*, memory));
-
-            pxArenaRewind(arena, offset);
-
-            if (state != 0) return 1;
-        }
-    }
-
-    pxArenaRewind(arena, offset);
-
-    return 0;
-}
-
-pxb8
-pxWindowsFileDelete(PxArena* arena, PxString8 base, PxString8 name)
+pxWindowsFileDestroy(PxArena* arena, PxString8 base, PxString8 name)
 {
     pxiword offset = pxArenaOffset(arena);
     PxPath  path   = pxPathFromString8(arena, base, pxs8("/"));
@@ -249,7 +212,7 @@ pxWindowsFileDelete(PxArena* arena, PxString8 base, PxString8 name)
 
     if (string.length > 0) {
         pxb8 result =
-            DeleteFileW(pxCast(wchar_t*, string.memory));
+            DeleteFileW(px_as(wchar_t*, string.memory));
 
         pxArenaRewind(arena, offset);
 
@@ -262,14 +225,13 @@ pxWindowsFileDelete(PxArena* arena, PxString8 base, PxString8 name)
 }
 
 pxiword
-pxWindowsFileWriteMemory(PxWindowsFile* self, void* memory, pxiword amount, pxiword stride)
+pxWindowsFileWrite(PxWindowsFile* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    DWORD   temp   = 0;
+    DWORD temp = 0;
 
     for (pxiword i = 0; i < length;) {
-        char* mem = pxCast(char*, memory + i);
-        int   len = pxCast(int,   length - i);
+        char* mem = px_as(char*, memory + i);
+        int   len = px_as(int,   length - i);
 
         pxb32 state = WriteFile(self->handle, mem, len, &temp, 0);
 
@@ -283,13 +245,12 @@ pxWindowsFileWriteMemory(PxWindowsFile* self, void* memory, pxiword amount, pxiw
 }
 
 pxiword
-pxWindowsFileReadMemory(PxWindowsFile* self, void* memory, pxiword amount, pxiword stride)
+pxWindowsFileRead(PxWindowsFile* self, pxu8* memory, pxiword length)
 {
-    pxiword length = amount * stride;
-    DWORD   temp   = 0;
+    DWORD temp = 0;
 
-    char* mem = pxCast(char*, memory);
-    int   len = pxCast(int,   length);
+    char* mem = px_as(char*, memory);
+    int   len = px_as(int,   length);
 
     pxb32 state = ReadFile(self->handle, mem, len, &temp, 0);
 
