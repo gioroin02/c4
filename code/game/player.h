@@ -1,7 +1,7 @@
 #ifndef C4_GAME_PLAYER_H
 #define C4_GAME_PLAYER_H
 
-#include "import.h"
+#include "./import.h"
 
 typedef struct C4_Game_Player
 {

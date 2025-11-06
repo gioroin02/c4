@@ -1,259 +1,159 @@
-#ifndef C4_SERVER_C
-#define C4_SERVER_C
+#ifndef C4_SERVER_SERVER_C
+#define C4_SERVER_SERVER_C
 
-#include "server.h"
+#include "./server.h"
 
-#include <stdio.h>
-
-#define COLOR_RESET "\x1b[0m"
-
-#define FRONT_RED    "\x1b[31m"
-#define FRONT_GREEN  "\x1b[32m"
-#define FRONT_YELLOW "\x1b[33m"
-#define FRONT_BLUE   "\x1b[34m"
-#define FRONT_PURPLE "\x1b[35m"
-#define FRONT_AZURE  "\x1b[36m"
-
-#define RED(expr)    FRONT_RED    expr COLOR_RESET
-#define GREEN(expr)  FRONT_GREEN  expr COLOR_RESET
-#define YELLOW(expr) FRONT_YELLOW expr COLOR_RESET
-#define BLUE(expr)   FRONT_BLUE   expr COLOR_RESET
-#define PURPLE(expr) FRONT_PURPLE expr COLOR_RESET
-#define AZURE(expr)  FRONT_AZURE  expr COLOR_RESET
-
-#define FATAL PURPLE("FATAL")
-#define ERROR RED("ERROR")
-#define WARN  YELLOW("WARN")
-#define INFO  BLUE("INFO")
-#define DEBUG GREEN("DEBUG")
-#define TRACE AZURE("TRACE")
-
-C4Server
-c4ServerMake(PxArena* arena, pxiword length, PxAddressType type)
+C4_Server
+c4_server_create(Pax_Arena* arena, paxiword length, Pax_Addr_Kind kind)
 {
-    PxArray sessions =
-        pxArrayReserve(arena, C4Session*, length);
-
-    if (sessions.length <= 0) return (C4Server) {0};
-
-    PxSocketTcp socket = pxSocketTcpCreate(arena, type);
-
-    if (socket == 0) return (C4Server) {0};
-
-    return (C4Server) {
-        .socket   = socket,
-        .sessions = sessions,
+    return (C4_Server) {
+        .socket       = pax_socket_tcp_create(arena, kind),
+        .session_list = pax_array_create(arena, C4_Session*, length),
     };
 }
 
-pxb8
-c4ServerStart(C4Server* self, PxAddress address, pxu16 port)
-{
-    printf(TRACE " Attivazione porta " YELLOW("%u") ": ", port);
-
-    pxb8 state =
-        pxSocketTcpBind(self->socket, address, port);
-
-    printf("%s\n", state != 0 ?
-        GREEN("SUCCEDED") : RED("FAILED"));
-
-    if (state != 0) {
-        printf(TRACE " Ascolto porta: ");
-
-        state = pxSocketTcpListen(self->socket);
-
-        printf("%s\n", state != 0 ?
-            GREEN("SUCCEDED") : RED("FAILED"));
-    }
-
-    return state;
-}
-
 void
-c4ServerStop(C4Server* self)
+c4_server_destroy(C4_Server* self)
 {
     if (self == 0) return;
 
-    for (pxiword i = 0; i < self->sessions.size; i += 1) {
-        C4Session* session = 0;
+    while (pax_array_elements(&self->session_list) > 0) {
+        C4_Session* session = 0;
 
-        pxArrayRead(&self->sessions, i,
-            C4Session*, &session);
+        paxiword index =
+            pax_array_tail(&self->session_list);
 
-        c4SessionClose(self, session);
+        pax_array_remove(&self->session_list,
+            C4_Session*, index, &session, 1);
+
+        c4_session_stop(self, session);
     }
 
-    pxSocketTcpDestroy(self->socket);
-
-    self->socket = 0;
+    c4_server_stop(self);
 }
 
-void
-c4ServerBroadcast(C4Server* self, PxArena* arena, C4Session* from, C4Msg value)
+paxb8
+c4_server_start(C4_Server* self, Pax_Addr addr, paxu16 port)
 {
-    for (pxiword i = 0; i < self->sessions.size; i += 1) {
-        C4Session* session = 0;
-
-        pxArrayRead(&self->sessions, i,
-            C4Session*, &session);
-
-        if (session == from) continue;
-
-        c4SessionWrite(session, arena, value);
-    }
-}
-
-pxiword
-c4ServerFind(C4Server* self, C4Session* value)
-{
-    for (pxiword i = 0; i < self->sessions.size; i += 1) {
-        C4Session* session = 0;
-
-        pxArrayRead(&self->sessions, i,
-            C4Session*, &session);
-
-        if (session == value) return i + 1;
-    }
+    if (pax_socket_tcp_bind(self->socket, addr, port) != 0)
+        return pax_socket_tcp_listen(self->socket);
 
     return 0;
 }
 
-pxb8
-c4ServerGet(C4Server* self, pxiword index, C4Session** value)
+void
+c4_server_stop(C4_Server* self)
 {
-    return pxArrayRead(&self->sessions, index, C4Session*, value);
+    if (self == 0) return;
+
+    pax_socket_tcp_destroy(self->socket);
+
+    self->socket = 0;
 }
 
-C4Session*
-c4ServerGetOr(C4Server* self, pxiword index, C4Session* value)
+paxb8
+c4_server_peek(C4_Server* self, paxiword index, C4_Session** value)
 {
-    C4Session* result = 0;
+    return pax_array_peek(&self->session_list,
+        C4_Session*, index, value, 1);
+}
 
-    if (pxArrayRead(&self->sessions, index, C4Session*, &result) == 0)
+C4_Session*
+c4_server_peek_or(C4_Server* self, paxiword index, C4_Session* value)
+{
+    C4_Session* result = 0;
+
+    if (c4_server_peek(self, index, &result) == 0)
         return value;
 
     return result;
 }
 
-C4Session*
-c4SessionOpen(C4Server* self, PxArena* arena)
+paxiword
+c4_server_find(C4_Server* self, C4_Session* value)
 {
-    printf(TRACE " Apertura sessione... ");
+    paxiword elements =
+        pax_array_elements(&self->session_list);
 
-    pxiword size   = self->sessions.size;
-    pxiword length = self->sessions.length;
-    pxiword offset = pxArenaOffset(arena);
+    for (paxiword i = 0; i < elements; i += 1) {
+        if (c4_server_peek_or(self, i, 0) == value)
+            return i;
+    }
 
-    if (size < 0 || size >= length) return 0;
+    return elements;
+}
 
-    C4Session* result = pxArenaReserve(arena, C4Session, 1);
+void
+c4_server_echo(C4_Server* self, Pax_Arena* arena, C4_Session* from, C4_Game_Message value)
+{
+    paxiword elements =
+        pax_array_elements(&self->session_list);
+
+    for (paxiword i = 0; i < elements; i += 1) {
+        C4_Session* session = c4_server_peek_or(self, i, 0);
+
+        if (session != from)
+            c4_session_write(session, arena, value);
+    }
+}
+
+C4_Session*
+c4_session_start(C4_Server* self, Pax_Arena* arena)
+{
+    paxiword mark = pax_arena_tell(arena);
+
+    if (pax_array_is_full(&self->session_list) != 0)
+        return 0;
+
+    C4_Session* result = pax_arena_reserve(arena, C4_Session, 1);
 
     if (result == 0) return 0;
 
-    result->socket = pxSocketTcpAccept(self->socket, arena);
+    result->socket = pax_socket_tcp_accept(self->socket, arena);
 
     if (result->socket != 0) {
-        pxArrayInsertTail(&self->sessions,
-            C4Session*, &result);
+        paxiword index =
+            pax_array_tail(&self->session_list);
 
-        PxAddress address = pxSocketTcpGetAddress(result->socket);
-        pxu16     port    = pxSocketTcpGetPort(result->socket);
-
-        printf("con {addr = [");
-
-        switch (address.type) {
-            case PX_ADDRESS_TYPE_IP4: {
-                for (pxiword i = 0; i < PX_ADDRESS_IP4_GROUPS; i += 1) {
-                    printf(YELLOW("%u"), address.ip4.memory[i]);
-
-                    if (i + 1 != PX_ADDRESS_IP4_GROUPS)
-                        printf(YELLOW("."));
-                }
-            } break;
-
-            case PX_ADDRESS_TYPE_IP6: {
-                for (pxiword i = 0; i < PX_ADDRESS_IP6_GROUPS; i += 1) {
-                    printf(YELLOW("%x"), address.ip6.memory[i]);
-
-                    if (i + 1 != PX_ADDRESS_IP6_GROUPS)
-                        printf(YELLOW(":"));
-                }
-            } break;
-
-            default: break;
-        }
-
-        printf("], port = " YELLOW("%u") "}: %s\n", port,
-            result != 0 ? GREEN("SUCCEDED") : RED("FAILED"));
+        pax_array_insert(&self->session_list,
+            C4_Session*, index + 1, &result, 1);
 
         return result;
     }
 
-    pxArenaRewind(arena, offset);
+    pax_arena_rewind(arena, mark, 0);
 
     return 0;
 }
 
-pxb8
-c4SessionClose(C4Server* self, C4Session* session)
+paxb8
+c4_session_stop(C4_Server* self, C4_Session* session)
 {
-    pxiword index = c4ServerFind(self, session);
-    pxb8    state = 0;
+    paxiword index = c4_server_find(self, session);
+    paxiword size  = pax_array_elements(&self->session_list);
+    paxb8    state = 0;
 
-    if (index == 0) return 0;
+    if (index < 0 || index >= size) return 0;
 
-    state = pxArrayRemove(&self->sessions,
-        index - 1, C4Session*, &session);
+    state = pax_array_remove(&self->session_list,
+        C4_Session*, index, 0, 1);
 
     if (state != 0)
-        pxSocketTcpDestroy(session->socket);
+        pax_socket_tcp_destroy(session->socket);
 
     return state;
 }
 
-pxb8
-c4SessionWrite(C4Session* self, PxArena* arena, C4Msg value)
+paxb8
+c4_session_write(C4_Session* self, Pax_Arena* arena, C4_Game_Message value)
 {
-    printf(TRACE " Scrittura di ");
-
-    pxiword offset = pxArenaOffset(arena);
-
-    c4LogMsg(&value);
-
-    PxJsonWriter writer = pxJsonWriterMake(arena, 4,
-        pxSocketTcpWriter(self->socket, &self->request));
-
-    pxb8 state = c4JsonWriteMsg(&value, &writer, arena);
-
-    pxArenaRewind(arena, offset);
-
-    printf("%s\n", state != 0 ?
-        GREEN("SUCCEDED") : RED("FAILED"));
-
-    return state;
+    return c4_game_message_json_write(&value, &self->writer, arena);
 }
 
-C4Msg
-c4SessionRead(C4Session* self, PxArena* arena)
+paxb8
+c4_session_Read(C4_Session* self, Pax_Arena* arena, C4_Game_Message* value)
 {
-    printf(TRACE " Lettura di... ");
-
-    C4Msg result = {0};
-    pxiword   offset = pxArenaOffset(arena);
-
-    PxJsonReader reader = pxJsonReaderMake(arena, 4,
-        pxSocketTcpReader(self->socket, &self->request));
-
-    pxb8 state = c4JsonReadMsg(&result, &reader, arena);
-
-    c4LogMsg(&result);
-
-    pxArenaRewind(arena, offset);
-
-    printf("%s\n", state != 0 ?
-        GREEN("SUCCEDED") : RED("FAILED"));
-
-    return result;
+    return c4_game_message_json_write(value, &self->writer, arena);
 }
 
-#endif // C4_SERVER_C
+#endif // C4_SERVER_SERVER_C
