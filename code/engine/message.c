@@ -1,5 +1,5 @@
-#ifndef C4_MESSAGE_MESSAGE_C
-#define C4_MESSAGE_MESSAGE_C
+#ifndef C4_ENGINE_GAME_MESSAGE_C
+#define C4_ENGINE_GAME_MESSAGE_C
 
 #include "./message.h"
 
@@ -458,4 +458,4 @@ c4_game_message_json_read_stop(C4_Game_Message_Stop* self, Pax_JSON_Reader* read
     return 1;
 }
 
-#endif // C4_MESSAGE_MESSAGE_C
+#endif // C4_ENGINE_GAME_MESSAGE_C

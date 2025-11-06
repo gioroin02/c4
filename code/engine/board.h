@@ -1,5 +1,5 @@
-#ifndef C4_GAME_BOARD_H
-#define C4_GAME_BOARD_H
+#ifndef C4_ENGINE_GAME_BOARD_H
+#define C4_ENGINE_GAME_BOARD_H
 
 #include "./import.h"
 
@@ -48,4 +48,4 @@ c4_game_board_contains_point(C4_Game_Board* self, paxiword col, paxiword row, pa
 paxiword
 c4_game_board_contains_line(C4_Game_Board* self, paxiword col, paxiword row, paxiword dcol, paxiword drow, paxuword* value);
 
-#endif // C4_GAME_BOARD_H
+#endif // C4_ENGINE_GAME_BOARD_H

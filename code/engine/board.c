@@ -1,5 +1,5 @@
-#ifndef C4_GAME_BOARD_C
-#define C4_GAME_BOARD_C
+#ifndef C4_ENGINE_GAME_BOARD_C
+#define C4_ENGINE_GAME_BOARD_C
 
 #include "./board.h"
 
@@ -181,4 +181,4 @@ c4_game_board_contains_line(C4_Game_Board* self, paxiword x, paxiword y, paxiwor
     return result;
 }
 
-#endif // C4_GAME_BOARD_C
+#endif // C4_ENGINE_GAME_BOARD_C

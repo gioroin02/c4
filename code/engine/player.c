@@ -1,5 +1,5 @@
-#ifndef C4_GAME_PLAYER_C
-#define C4_GAME_PLAYER_C
+#ifndef C4_ENGINE_GAME_PLAYER_C
+#define C4_ENGINE_GAME_PLAYER_C
 
 #include "./player.h"
 
@@ -88,4 +88,4 @@ c4_game_player_list_peek(C4_Game_Player_List* self, paxiword index, C4_Game_Play
     return pax_array_peek(&self->items, C4_Game_Player, index, value, 1);
 }
 
-#endif // C4_GAME_PLAYER_C
+#endif // C4_ENGINE_GAME_PLAYER_C

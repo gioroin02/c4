@@ -19,12 +19,12 @@ set "time=%code_core_dir%\time\export.c"
 
 set "json=%code_encoding_dir%\json\export.c"
 
-set "game=%code_c4_dir%\game\export.c"
+set "engine=%code_c4_dir%\engine\export.c"
 set "client=%code_c4_dir%\client\export.c"
 
 set "test_client=%test_c4_dir%\client\main.c"
 
-set "impl=%base% %memory% %string% %format% %stream% %process% %network% %storage% %console% %time% %json% %game% %client%"
+set "impl=%base% %memory% %string% %format% %stream% %process% %network% %storage% %console% %time% %json% %engine% %client%"
 
 set "lib=-lws2_32"
 

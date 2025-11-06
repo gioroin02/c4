@@ -1,4 +1,4 @@
-#include "../../code/game/export.h"
+#include "../../code/engine/export.h"
 
 #include <stdio.h>
 
@@ -95,8 +95,6 @@ main(int argc, char** argv)
         .channel = &channel,
     };
 
-    Pax_Clock clock = pax_clock_create(&arena);
-
     if (pax_console_mode_apply(console, PAX_CONSOLE_MODE_RAW) == 0)
         return 1;
 
@@ -110,16 +108,7 @@ main(int argc, char** argv)
 
     paxiword tick = 0;
 
-    paxf32 total = 0;
-    paxf32 slice = 1.0 / 30.0;
-
-    paxf32 elapsed = 0;
-
     while (active != 0) {
-        elapsed = pax_clock_elapsed(clock);
-
-        total += elapsed;
-
         C4_Console_Message message = {0};
 
         while (pax_channel_try_remove(&channel, C4_Console_Message, &message) != 0) {
@@ -131,8 +120,6 @@ main(int argc, char** argv)
 
         for (paxiword i = 0; i < 8; i += 1)
             pax_thread_pool_try_delegate(pool, &console_ctxt, &c4_console_proc);
-
-        for (; total > slice; total -= slice) {}
 
         c4_console_buffer_clear(&buffer, PAX_ASCII_COMMERCIAL,
             C4_COLOR_DEFAULT_FRONT, C4_COLOR_DEFAULT_BACK);

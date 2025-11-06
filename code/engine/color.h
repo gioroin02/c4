@@ -1,5 +1,5 @@
-#ifndef C4_GAME_COLOR_H
-#define C4_GAME_COLOR_H
+#ifndef C4_ENGINE_COLOR_H
+#define C4_ENGINE_COLOR_H
 
 #include "./import.h"
 
@@ -44,4 +44,4 @@ typedef struct C4_Color
 }
 C4_Color;
 
-#endif // C4_GAME_COLOR_H
+#endif // C4_ENGINE_COLOR_H

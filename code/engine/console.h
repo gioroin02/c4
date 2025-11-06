@@ -1,5 +1,5 @@
-#ifndef C4_GAME_PAINTER_H
-#define C4_GAME_PAINTER_H
+#ifndef C4_ENGINE_CONSOLE_H
+#define C4_ENGINE_CONSOLE_H
 
 #include "./color.h"
 
@@ -78,4 +78,4 @@ c4_target_unicode(Pax_Target* self, Pax_Arena* arena, paxi32 value);
 void
 c4_target_console_buffer(Pax_Target* self, Pax_Arena* arena, C4_Console_Buffer* buffer);
 
-#endif // C4_GAME_PAINTER_H
+#endif // C4_ENGINE_CONSOLE_H

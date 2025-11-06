@@ -19,14 +19,14 @@ set "time=%code_core_dir%\time\export.c"
 
 set "json=%code_encoding_dir%\json\export.c"
 
-set "game=%code_c4_dir%\game\export.c"
+set "engine=%code_c4_dir%\engine\export.c"
 
-set "test_message=%test_c4_dir%\game\message.c"
-set "test_board=%test_c4_dir%\game\board.c"
+set "test_message=%test_c4_dir%\engine\message.c"
+set "test_board=%test_c4_dir%\engine\board.c"
 
-set "impl=%base% %memory% %string% %format% %stream% %process% %network% %storage% %console% %time% %json% %game%"
+set "impl=%base% %memory% %string% %format% %stream% %process% %network% %storage% %console% %time% %json% %engine%"
 
 set "lib=-lws2_32"
 
-zig cc --std=c99 %impl% %test_message% %lib% -o game_message.exe
-zig cc --std=c99 %impl% %test_board% %lib%   -o game_board.exe
+zig cc --std=c99 %impl% %test_message% %lib% -o engine_message.exe
+zig cc --std=c99 %impl% %test_board% %lib%   -o engine_board.exe

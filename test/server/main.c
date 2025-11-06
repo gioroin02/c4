@@ -302,7 +302,6 @@ main(int argc, char** argv)
     C4_Game game = {0};
 
     printf("CREATE, sleeping...\n");
-
     pax_current_thread_sleep(5000);
 
     printf("DESTROY\n");

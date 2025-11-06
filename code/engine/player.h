@@ -1,5 +1,5 @@
-#ifndef C4_GAME_PLAYER_H
-#define C4_GAME_PLAYER_H
+#ifndef C4_ENGINE_GAME_PLAYER_H
+#define C4_ENGINE_GAME_PLAYER_H
 
 #include "./import.h"
 
@@ -44,4 +44,4 @@ c4_game_player_list_remove(C4_Game_Player_List* self, paxuword code, C4_Game_Pla
 paxb8
 c4_game_player_list_peek(C4_Game_Player_List* self, paxiword index, C4_Game_Player* value);
 
-#endif // C4_GAME_PLAYER_H
+#endif // C4_ENGINE_GAME_PLAYER_H

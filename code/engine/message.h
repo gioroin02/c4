@@ -1,5 +1,5 @@
-#ifndef C4_MESSAGE_MESSAGE_H
-#define C4_MESSAGE_MESSAGE_H
+#ifndef C4_ENGINE_GAME_MESSAGE_H
+#define C4_ENGINE_GAME_MESSAGE_H
 
 #include "./import.h"
 
@@ -212,4 +212,4 @@ c4_game_message_json_read_start(C4_Game_Message_Start* self, Pax_JSON_Reader* re
 paxb8
 c4_game_message_json_read_stop(C4_Game_Message_Stop* self, Pax_JSON_Reader* reader, Pax_Arena* arena);
 
-#endif // C4_MESSAGE_MESSAGE_H
+#endif // C4_ENGINE_GAME_MESSAGE_H

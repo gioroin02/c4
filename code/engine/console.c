@@ -1,7 +1,7 @@
-#ifndef C4_GAME_PAINTER_C
-#define C4_GAME_PAINTER_C
+#ifndef C4_ENGINE_CONSOLE_C
+#define C4_ENGINE_CONSOLE_C
 
-#include "./painter.h"
+#include "./console.h"
 
 C4_Console_Buffer
 c4_console_buffer_create(Pax_Arena* arena, paxiword width, paxiword height)
@@ -436,4 +436,4 @@ c4_target_console_buffer(Pax_Target* self, Pax_Arena* arena, C4_Console_Buffer* 
     }
 }
 
-#endif // C4_GAME_PAINTER_C
+#endif // C4_ENGINE_CONSOLE_C
