@@ -154,4 +154,22 @@ pax_linux_console_read(Pax_Linux_Console* self, paxu8* memory, paxiword length)
     return 0;
 }
 
+paxiword
+pax_linux_console_poll(Pax_Linux_Console* self, paxu8* memory, paxiword length)
+{
+    struct timeval time = {0};
+
+    fd_set handles;
+
+    FD_ZERO(&handles);
+    FD_SET(0, &handles);
+
+    paxiword size = select(1, &handles, 0, 0, &time);
+
+    if (size < 0) return 0;
+
+    return pax_linux_console_read(self,
+        memory, pax_min(length, size));
+}
+
 #endif // PAX_LINUX_CONSOLE_CONSOLE_C

@@ -144,4 +144,18 @@ pax_win32_console_read(Pax_Win32_Console* self, paxu8* memory, paxiword length)
     return 0;
 }
 
+paxiword
+pax_win32_console_poll(Pax_Win32_Console* self, paxu8* memory, paxiword length)
+{
+    HANDLE   input = GetStdHandle(STD_INPUT_HANDLE);
+    paxiword size  = 0;
+
+    GetNumberOfConsoleInputEvents(input, pax_as(DWORD*, &size));
+
+    if (size < 0) return 0;
+
+    return pax_win32_console_read(self,
+        memory, pax_min(length, size));
+}
+
 #endif // PAX_WIN32_CONSOLE_CONSOLE_C

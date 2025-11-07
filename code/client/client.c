@@ -8,7 +8,7 @@ c4_game_console_input_task(C4_Game_Client* self, Pax_Arena _)
 {
     paxu8 byte = 0;
 
-    if (pax_console_read(self, &byte, 1) <= 0) return;
+    if (pax_console_poll(self, &byte, 1) <= 0) return;
 
     C4_Console_Message message = c4_console_message_unicode(byte);
 
@@ -62,15 +62,7 @@ c4_game_client_network_connect(C4_Game_Client* self, Pax_Arena* arena)
 paxb8
 c4_game_client_network_push(C4_Game_Client* self, Pax_Arena* arena, C4_Game_Message value)
 {
-    Pax_Worker_Data data = {
-        .ctxt = self,
-        .proc = &c4_game_network_output_task,
-    };
-
-    if (pax_channel_insert(&self->network_output, C4_Game_Message, &value) == 0)
-        return 0;
-
-    return pax_thread_pool_delegate(self->pool, data);
+    return pax_channel_insert(&self->network_output, C4_Game_Message, &value);
 }
 
 paxb8
@@ -140,9 +132,8 @@ c4_game_client_network_input(C4_Game_Client* self, Pax_Arena* arena)
         } break;
 
         case C4_GAME_STATE_WAIT: {
-            C4_Game_Player player = {0};
-
-            c4_game_player_list_peek(&self->game_player_list, 0, &player);
+            C4_Game_Player player = c4_game_player_list_peek_or(
+                &self->game_player_list, 0, (C4_Game_Player) {0});
 
             if (message.kind == C4_GAME_MESSAGE_KIND_PLAYER_TURN) {
                 self->state = C4_GAME_STATE_WATCH;
@@ -206,13 +197,19 @@ c4_game_client_console_pull(C4_Game_Client* self, Pax_Arena* arena, C4_Console_M
 paxb8
 c4_game_client_console_input(C4_Game_Client* self, Pax_Arena* arena)
 {
+    Pax_Worker_Data data = {
+        .ctxt = self,
+        .proc = &c4_game_console_input_task,
+    };
+
+    pax_thread_pool_delegate(self->pool, data);
+
     C4_Console_Message message = {0};
 
     if (c4_game_client_console_pull(self, arena, &message) == 0)
         return 1;
 
-    if (message.kind == C4_CONSOLE_MESSAGE_QUIT)
-        return 0;
+    if (message.kind == C4_CONSOLE_MESSAGE_QUIT) return 0;
 
     return 1;
 }
@@ -246,6 +243,9 @@ c4_game_client_start(C4_Game_Client* self, C4_Engine* engine, Pax_Arena* arena)
 
     self->console = pax_console_create(arena);
 
+    if (pax_console_mode_apply(self->console, PAX_CONSOLE_MODE_RAW) == 0)
+        return 0;
+
     Pax_Scanner scanner = pax_scanner_create(arena, 32,
         pax_source_from_socket_tcp(arena, self->socket));
 
@@ -255,6 +255,12 @@ c4_game_client_start(C4_Game_Client* self, C4_Engine* engine, Pax_Arena* arena)
         pax_target_from_socket_tcp(arena, self->socket));
 
     return 1;
+}
+
+void
+c4_game_client_stop(C4_Game_Client* self, C4_Engine* engine)
+{
+    pax_console_mode_apply(self, PAX_CONSOLE_MODE_DEFAULT);
 }
 
 paxb8

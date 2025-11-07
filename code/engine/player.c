@@ -88,4 +88,15 @@ c4_game_player_list_peek(C4_Game_Player_List* self, paxiword index, C4_Game_Play
     return pax_array_peek(&self->items, C4_Game_Player, index, value, 1);
 }
 
+C4_Game_Player
+c4_game_player_list_peek_or(C4_Game_Player_List* self, paxiword index, C4_Game_Player value)
+{
+    C4_Game_Player result = {0};
+
+    if (c4_game_player_list_peek(self, index, &result) == 0)
+        return value;
+
+    return result;
+}
+
 #endif // C4_ENGINE_GAME_PLAYER_C

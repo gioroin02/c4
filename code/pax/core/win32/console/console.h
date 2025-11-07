@@ -23,4 +23,7 @@ pax_win32_console_write(Pax_Win32_Console* self, paxu8* memory, paxiword length)
 paxiword
 pax_win32_console_read(Pax_Win32_Console* self, paxu8* memory, paxiword length);
 
+paxiword
+pax_win32_console_poll(Pax_Win32_Console* self, paxu8* memory, paxiword length);
+
 #endif // PAX_WIN32_CONSOLE_CONSOLE_H

@@ -77,6 +77,9 @@ c4_game_client_console_output(C4_Game_Client* self, Pax_Arena* arena);
 paxb8
 c4_game_client_start(C4_Game_Client* self, C4_Engine* engine, Pax_Arena* arena);
 
+void
+c4_game_client_stop(C4_Game_Client* self, C4_Engine* engine);
+
 paxb8
 c4_game_client_input(C4_Game_Client* self, C4_Engine* engine, Pax_Arena* arena);
 

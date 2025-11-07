@@ -13,6 +13,7 @@
     #define __pax_console_mode_query__ pax_win32_console_mode_query
     #define __pax_console_write__      pax_win32_console_write
     #define __pax_console_read__       pax_win32_console_read
+    #define __pax_console_poll__       pax_win32_console_poll
 
 #elif PAX_SYSTEM == PAX_SYSTEM_LINUX
 
@@ -24,6 +25,7 @@
     #define __pax_console_mode_query__ pax_linux_console_mode_query
     #define __pax_console_write__      pax_linux_console_write
     #define __pax_console_read__       pax_linux_console_read
+    #define __pax_console_poll__       pax_linux_console_poll
 
 #else
 
@@ -65,6 +67,12 @@ paxiword
 pax_console_read(Pax_Console self, paxu8* memory, paxiword length)
 {
     return __pax_console_read__(self, memory, length);
+}
+
+paxiword
+pax_console_poll(Pax_Console self, paxu8* memory, paxiword length)
+{
+    return __pax_console_poll__(self, memory, length);
 }
 
 Pax_Source*

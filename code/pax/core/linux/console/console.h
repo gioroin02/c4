@@ -23,4 +23,7 @@ pax_linux_console_write(Pax_Linux_Console* self, paxu8* memory, paxiword length)
 paxiword
 pax_linux_console_read(Pax_Linux_Console* self, paxu8* memory, paxiword length);
 
+paxiword
+pax_linux_console_poll(Pax_Linux_Console* self, paxu8* memory, paxiword length);
+
 #endif // PAX_LINUX_CONSOLE_CONSOLE_H

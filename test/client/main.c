@@ -1,10 +1,8 @@
 #include "../../code/client/export.h"
 
-#include <stdio.h>
-
-#define C4_ARG_SERVER_IPV4 pax_str8("server-ipv4:")
-#define C4_ARG_SERVER_IPV6 pax_str8("server-ipv6:")
-#define C4_ARG_SERVER_PORT pax_str8("server-port:")
+#define C4_ARG_SERVER_IPV4 pax_str8("server-ipv4=")
+#define C4_ARG_SERVER_IPV6 pax_str8("server-ipv6=")
+#define C4_ARG_SERVER_PORT pax_str8("server-port=")
 #define C4_ARG_AUTOMATIC   pax_str8("auto")
 
 int
@@ -60,6 +58,7 @@ main(int argc, char** argv)
 
     engine.ctxt        = &client;
     engine.proc_start  = &c4_game_client_start;
+    engine.proc_stop   = &c4_game_client_stop;
     engine.proc_input  = &c4_game_client_input;
     engine.proc_output = &c4_game_client_output;
 

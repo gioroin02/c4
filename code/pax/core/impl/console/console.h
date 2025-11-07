@@ -23,6 +23,9 @@ pax_console_write(Pax_Console self, paxu8* memory, paxiword length);
 paxiword
 pax_console_read(Pax_Console self, paxu8* memory, paxiword length);
 
+paxiword
+pax_console_poll(Pax_Console self, paxu8* memory, paxiword length);
+
 Pax_Source*
 pax_source_from_console(Pax_Arena* arena, Pax_Console self);
 
