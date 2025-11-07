@@ -58,8 +58,10 @@ main(int argc, char** argv)
 
     C4_Engine engine = {0};
 
-    engine.ctxt       = &client;
-    engine.proc_start = &c4_game_client_start;
+    engine.ctxt        = &client;
+    engine.proc_start  = &c4_game_client_start;
+    engine.proc_input  = &c4_game_client_input;
+    engine.proc_output = &c4_game_client_output;
 
     c4_engine_play(&engine, &arena, 30);
 

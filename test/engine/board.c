@@ -118,8 +118,14 @@ main(int argc, char** argv)
             printf("%lli\n", tick++);
         }
 
-        for (paxiword i = 0; i < 8; i += 1)
-            pax_thread_pool_try_delegate(pool, &console_ctxt, &c4_console_proc);
+        for (paxiword i = 0; i < 8; i += 1) {
+            Pax_Worker_Data data = {
+                .ctxt = &console_ctxt,
+                .proc = &c4_console_proc
+            };
+
+            pax_thread_pool_try_delegate(pool, data);
+        }
 
         c4_console_buffer_clear(&buffer, PAX_ASCII_COMMERCIAL,
             C4_COLOR_DEFAULT_FRONT, C4_COLOR_DEFAULT_BACK);
